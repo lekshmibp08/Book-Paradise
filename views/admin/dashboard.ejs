@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            height: 100vh;
+            background-color: #6f42c1;
+            padding-top: 20px;
+            color: white;
+            position: fixed;
+            left: 0;
+            width: 250px;
+            transition: left 0.3s;
+            z-index: 2;
+        }
+        .sidebar a {
+            color: white;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            text-align: center;
+        }
+        .sidebar a:hover {
+            background-color: #5a36a3;
+        }
+        .top-bar {
+            background-color: #6f42c1;
+            color: white;
+            padding: 10px;
+            margin-left: 250px;
+            transition: margin-left 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .top-bar .search-bar {
+            margin-right: 20px;
+        }
+        .main-content {
+            padding: 20px;
+            margin-left: 250px;
+            transition: margin-left 0.3s;
+        }
+        .card {
+            background-color: #d1c4e9;
+            color: black;
+            text-align: center;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .card h3 {
+            font-size: 2em;
+        }
+        .chart {
+            background-color: #e1bee7;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .download-btn {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin-top: 20px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                left: -250px;
+            }
+            .sidebar.active {
+                left: 0;
+            }
+            .top-bar {
+                margin-left: 0;
+            }
+            .top-bar.active {
+                margin-left: 250px;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .main-content.active {
+                margin-left: 250px;
+            }
+        }
+        .toggle-btn {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .toggle-btn {
+                display: block;
+                cursor: pointer;
+                margin-right: 20px;
+            }
+            .search-bar,
+            .user-info {
+                flex: 1;
+            }
+            .search-bar input {
+                width: 100%;
+            }
+        }
+        .header-content {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-content .search-bar {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="sidebar" id="sidebar">
+                <div class="text-center mb-4">
+                    <img src="/adminAssets/assets/images/main-logo.png" alt="Books Paradise" class="img-fluid">
+                </div>
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/admin/products">Products</a>
+                <a href="/admin/users">Users</a>
+                <a href="/admin/Orders">Orders</a>
+                <a href="/admin/coupons">Coupons</a>
+                <a href="/admin/category">Categories</a>
+                <a href="/admin/logout">Log Out</a>
+            </div>
+            <div class="col-md-12">
+                <div class="top-bar" id="top-bar">
+                    <div class="d-flex align-items-center">
+                        <span class="toggle-btn" id="toggle-btn"><i class="fas fa-bars fa-2x"></i></span>
+                        <div class="search-bar">
+                            <input type="text" class="form-control" placeholder="Search">
+                        </div>
+                    </div>
+                    <div class="user-info d-flex align-items-center">
+                        <span>Hi Admin</span>
+                        <i class="fas fa-user-circle fa-2x ml-3"></i>
+                    </div>
+                </div>
+                <div class="main-content" id="main-content">
+                    <h1>Dashboard</h1>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <h3>Total User</h3>
+                                <p></p>
+                                <i class="fas fa-users fa-3x"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <h3>Total Order</h3>
+                                <p></p>
+                                <i class="fas fa-box fa-3x"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <h3>Total Sales</h3>
+                                <p></p>
+                                <i class="fas fa-chart-line fa-3x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart">
+                        <h2>Sales Details</h2>
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                    <button class="download-btn">Download Reports</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.getElementById('toggle-btn').addEventListener('click', function() {
+            var sidebar = document.getElementById('sidebar');
+            var topBar = document.getElementById('top-bar');
+            var mainContent = document.getElementById('main-content');
+            sidebar.classList.toggle('active');
+            topBar.classList.toggle('active');
+            mainContent.classList.toggle('active');
+        });
+
+    </script>
+</body>
+</html>

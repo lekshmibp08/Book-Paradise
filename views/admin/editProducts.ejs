@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Products</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <link id="stylesheet" rel="stylesheet" href="/adminAssets/assets/css/addProduct.css">
+
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="sidebar" id="sidebar">
+                <div class="text-center mb-4">
+                    <img src="/adminAssets/assets/images/main-logo.png" alt="Books Paradise" class="img-fluid">
+                </div>
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/admin/products">Products</a>
+                <a href="/admin/users">Users</a>
+                <a href="/admin/Orders">Orders</a>
+                <a href="/admin/coupons">Coupons</a>
+                <a href="/admin/category">Categories</a>
+                <a href="/admin/logout">Log Out</a>
+            </div>
+            <div class="col-md-12">
+                <div class="top-bar" id="top-bar">
+                    <div class="d-flex align-items-center">
+                        <span class="toggle-btn" id="toggle-btn"><i class="fas fa-bars fa-2x"></i></span>
+                        <div class="search-bar">
+                            <input type="text" class="form-control" placeholder="Search">
+                        </div>
+                    </div>
+                    <div class="user-info d-flex align-items-center">
+                        <span>Hi Admin</span>
+                        <i class="fas fa-user-circle fa-2x ml-3"></i>
+                    </div>
+                </div>
+                <div class="main-content" id="main-content">
+                    <div class="header-content">
+                        <h2>Edit Products</h2>
+                    </div>
+                    <div class="row custom-row">
+                        <div class="col-lg-8">
+                            <div class="product-add-form">
+                                <h5>Product Details</h5>
+                                <form action="/admin/editProduct/<%=product._id%>" method="POST" id="product-form" enctype="multipart/form-data">
+                                    <label class="form-label">Product title</label>
+                                    <input type="text" name="productName" class="form-control" value="<%= product.productName %>">
+                                    <label class="form-label">Full description</label>
+                                    <textarea name="description" class="form-control" rows="5"><%= product.description %></textarea>
+                                    <div class="row">
+                                        <div class="col">
+                                            <label class="form-label">Regular price</label>
+                                            <input name="regularPrice" type="text" class="form-control" value="<%= product.regularPrice %>">
+                                        </div>
+                                        <div class="col">
+                                            <label class="form-label">Promotional Price</label>
+                                            <input name="salePrice" type="text" class="form-control" value="<%= product.salePrice %>">
+                                        </div>
+                                        <div class="col">
+                                            <label class="form-label">Category</label>
+                                            <select name="category" class="form-control">
+                                                <option value="">Select Category</option>
+                                                <% for (let i=0; i < category.length; i++) { %>
+                                                    <option value="<%= category[i].name %>">
+                                                        <%= category[i].name %>
+                                                    </option>
+                                                <% } %>                                                
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <label class="form-label">Language</label>
+                                    <input name="language" type="text" class="form-control" value="<%= product.language %>">
+                                    <label class="form-label">Author Title</label>
+                                    <input name="authorTitle" type="text" class="form-control" value="<%= product.authorTitle %>">
+                                    <label class="form-label">Author details</label>
+                                    <input name="authorDetails" type="text" class="form-control" value="<%= product.authorDetails %>">
+                                    <label class="form-label">Quantity</label>
+                                    <input name="quantity" type="number" class="form-control" value="<%= product.quantity %>">
+                                    <div class="media-upload">
+                                        <h3>Media</h3>
+                                        <div class="form-group">
+                                            <input name="productImage" type="file" class="form-control-file" multiple>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-add-product">Update</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('toggle-btn').addEventListener('click', function() {
+            var sidebar = document.getElementById('sidebar');
+            var topBar = document.getElementById('top-bar');
+            var mainContent = document.getElementById('main-content');
+            sidebar.classList.toggle('active');
+            topBar.classList.toggle('active');
+            mainContent.classList.toggle('active');
+        });
+
+        document.getElementById('product-form').addEventListener('submit', async function (e) {
+            e.preventDefault(); // Prevent the default form submission
+            const form = e.target;
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    alert(result.message);
+                    window.location.href = "/admin/products"; 
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while editing the product.');
+            }
+        });
+    </script>
+</body>
+</html>
