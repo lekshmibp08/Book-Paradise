@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+        <title>Books Paradise</title>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport">
+        <meta content="Bootstrap Ecommerce Template" name="keywords">
+        <meta content="Bootstrap Ecommerce Template Free Download" name="description">
+
+    <style>
+        .product-image {
+    width: 400px;
+    margin: 0 auto;
+}
+
+.product-image img {
+    width: 100%;
+}
+    </style>
+        
+</head>
+<body>
+
+
+    <div class="product-image">
+        <img id="zoom_01" src="/public/uploads/product-images/1716987747909.jpg" data-zoom-image="/public/uploads/product-images/1716987747909.jpg" alt="Product Image">
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Include elevateZoom plugin -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/3.0.8/jquery.elevatezoom.min.js"></script>
+
+
+<script src="https://unpkg.com/js-image-zoom@0.4.1/js-image-zoom.js" type="application/javascript"></script>
+
+<script>
+    $(document).ready(function() {
+        $("#zoom_01").elevateZoom({
+            zoomType: "lens",
+            lensShape: "round",
+            lensSize: 200
+        });
+    });
+    </script>
+
+</body>
+</html>

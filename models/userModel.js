@@ -36,9 +36,6 @@ var userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    cart: {
-        type: Array
-    },
     wishlist: {
         type: Array
     },

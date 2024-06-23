@@ -2,6 +2,7 @@ const Product = require("../models/productModel")
 const Category = require("../models/categoryModel")
 const fs = require("fs")
 const path = require("path")
+const { log } = require("console")
 
 
 //Render Add Product Page
@@ -11,6 +12,7 @@ const getProductAddPage = async (req, res) => {
         res.render("addProducts", { category: categories })
     } catch (error) {
         console.log(error.message);
+        res.status(400).render('error', { message: error.message });
     }
 }
 
@@ -50,6 +52,7 @@ const addProducts = async(req, res) => {
         }
     } catch (error) {
         console.log(error.message);
+        res.status(400).render('error', { message: error.message });
     }
 }
 
@@ -61,6 +64,7 @@ const getAllProducts = async (req, res) => {
         res.render("products", { products })
     } catch (error) {
         console.log(error.message);
+        res.status(400).render('error', { message: error.message });
     }
 }
 
@@ -74,59 +78,79 @@ const getEditProduct = async (req, res) => {
         res.render("editProducts", { product: findProduct, category: category })
     } catch (error) {
         console.log(error.message);
+        res.status(400).render('error', { message: error.message });
     }
 }
 
 
 //Edit and update Product details
-const editProduct = async(req, res) => {
+const editProduct = async (req, res) => {
     try {
         const id = req.params.id;
         console.log("update product working", id);
-        const data = req.body
-        const images = []
-        if (req.files && req.files.length > 0) {
-            for (let i = 0; i < req.files.length; i++) {
-                images.push(req.files[i].filename);
-            }
-        }
-        if (req.files.length > 0) {
-            const updatedProduct = await Product.findByIdAndUpdate(id, {
-                id: Date.now(),
-                productName: data.productName,
-                description: data.description,
-                authorTitle: data.authorTitle,
-                category: data.category,
-                regularPrice: data.regularPrice,
-                salePrice: data.salePrice,
-                authorDetails: data.authorDetails,
-                quantity: data.quantity,
-                language: data.language,
-                productImage: images
-            }, { new: true })
-            console.log("product updated");
-            res.status(200).json({ status: 'success', message: 'Product updated successfully.' });
-        }else{
-            const updatedProduct = await Product.findByIdAndUpdate(id, {
-                id: Date.now(),
-                productName: data.productName,
-                description: data.description,
-                authorTitle: data.authorTitle,
-                category: data.category,
-                regularPrice: data.regularPrice,
-                salePrice: data.salePrice,
-                authorDetails: data.authorDetails,
-                quantity: data.quantity,
-                language: data.language,
-            }, { new: true })
-            console.log("product updated");
-            res.status(200).json({ status: 'success', message: 'Product updated successfully.' });
-        }
+        const data = req.body;
+        const product = await Product.findById(id)
         
+        let existingImages = product.productImage || [];
+        console.log("IMAGES: ", existingImages);
 
+        if (req.files && req.files.length > 0) {
+            req.files.forEach(file => {
+                existingImages.push(file.filename);
+            });
+        }
+
+        const updatedProduct = await Product.findByIdAndUpdate(id, {
+            productName: data.productName,
+            description: data.description,
+            authorTitle: data.authorTitle,
+            category: data.category,
+            regularPrice: data.regularPrice,
+            salePrice: data.salePrice,
+            authorDetails: data.authorDetails,
+            quantity: data.quantity,
+            language: data.language,
+            productImage: existingImages
+        }, { new: true });
+
+        console.log("product updated");
+        res.status(200).json({ status: 'success', message: 'Product updated successfully.' });
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ status: 'error', message: 'An error occurred while editing the product.' });
+        //res.status(500).json({ status: 'error', message: 'An error occurred while editing the product.' });
+        res.status(400).render('error', { message: 'An error occurred while editing the product.' });
+    }
+};
+
+// To Delete Product Image
+const deleteImage = async (req, res) => {
+    try {
+        const { productId, imageName } = req.params;
+        
+        console.log("productId: ", productId);
+        console.log("Image: ", imageName);
+        console.log(await Product.findById(productId));
+
+        // Remove image from productImage array in Product document
+        const updatedProduct = await Product.findByIdAndUpdate(productId, {
+            $pull: { productImage: imageName }
+        });
+
+        console.log(updatedProduct);
+
+        // Optionally, delete the image file from the file system
+        const imagePath = path.join(__dirname, '../public/uploads/product-images', imageName);
+        if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+        }
+
+        console.log("File got unlinked");
+
+        res.json({ status: 'success', message: 'Image deleted successfully.' });
+    } catch (error) {
+        console.error('Error deleting image:', error);
+        res.status(400).render('error', { message: 'Image Deleted error' });
+        //res.status(500).json({ status: 'error', message: 'Failed to delete image.' });
     }
 }
 
@@ -140,6 +164,7 @@ const blockProduct = async (req, res) => {
         res.redirect("/admin/products")
     } catch (error) {
         console.log(error.message);
+        res.status(400).render('error', { message: error.message });
     }
 }
 
@@ -153,6 +178,7 @@ const unblockProduct = async (req, res) => {
         res.redirect("/admin/products")
     } catch (error) {
         console.log(error.message);
+        res.status(400).render('error', { message: error.message });
     }
 }
 
@@ -163,6 +189,7 @@ module.exports = {
     addProducts,
     getEditProduct,
     editProduct,
+    deleteImage,
     blockProduct,
     unblockProduct
 }

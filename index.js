@@ -33,7 +33,10 @@ app.use(session({
 app.set("view engine", "ejs")
 
 // Set the views directory for both user and admin views
-app.set("views", [path.join(__dirname, "views/user"), path.join(__dirname, "views/admin")]);
+app.set("views", [
+    path.join(__dirname, "views/user"), 
+    path.join(__dirname, "views/admin")
+]);
 
 
 app.use(express.static(path.join(__dirname, "public")))

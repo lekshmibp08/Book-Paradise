@@ -2,16 +2,30 @@ const nodemailer = require("nodemailer")
 const bcrypt = require("bcrypt");
 const expressAsyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
+const Product = require("../models/productModel")
+const Category = require("../models/categoryModel")
 const randomstring = require("randomstring");
 
 
 const pageNotFound = async (req, res) => {
     try {
-        res.render("404")
+        res.render("error", {
+            message: "Page not found"
+        })
     } catch (error) {
         console.log(error.message);
     }
 }
+
+const getContactUs = async(req, res) =>{
+    try {
+        res.render('contact')
+    } catch (error) {
+        console.log(error.message);
+        res.status(400).render('error', { message: error.message });
+    }
+}
+
 
 //Generate Hashed Password
 const securePassword = expressAsyncHandler(async (password) => {
@@ -22,14 +36,21 @@ const securePassword = expressAsyncHandler(async (password) => {
 
 
 //Load Home Page
-const getHomePage = expressAsyncHandler( async (req, res) => {
-    const user = req.session.user
-    if (user) {
-        res.render("home")
-    } else {
-        res.render("home")
+const getHomePage = async(req, res) => {
+    try {
+        const user = req.session.user
+        const userData = await User.findOne({})
+        const productData = await Product.find({ isBlocked: false }).sort({ id: -1 }).limit(6)
+        if (user) {
+            res.render("home", { user: userData, products: productData })
+        } else {
+            res.render("home", { products: productData })
+        }
+    } catch (error) {
+        console.log(error.message);
+        res.status(400).render('error', { message: error.message });
     }
-})
+}
 
 
 //Load signup page
@@ -42,6 +63,7 @@ const getSignupPage = async (req, res) => {
         }
     } catch (error) {
         console.log(error.message);
+        res.status(400).render('error', { message: error.message });
     }
 };
 
@@ -50,13 +72,16 @@ const getSignupPage = async (req, res) => {
 const getLoginPage = async (req, res) => {
     try{
         if( !req.session.user ) {
-            res.render("login")
+            const message = req.query.message;
+            res.render("login", { message });
         }
         else{
-            res.render("/")
+            console.log("test");
+            res.redirect("/")
         }
     }
     catch(error){
+        res.redirect("/login");
         console.log(error.message);
     }
 }
@@ -120,7 +145,8 @@ const verifyEmail = async (req, res) =>{
                 res.render("signup", { message: "Passwords are not matching" })
             }
         } catch (error) {
-            console.log(error.message);      
+            console.log(error.message);
+            res.status(400).render('error', { message: error.message });      
         }
 }
 
@@ -132,6 +158,7 @@ const getOtpPage = async (req, res) => {
         res.render("verify-otp")
     } catch (error) {
         console.log(error.message);
+        res.status(400).render('error', { message: error.message });
     }
 }
 
@@ -171,7 +198,7 @@ const resendOTP = async (req, res) => {
         })
     } catch (error) {
         console.log(error.message);
-        res.json({ success: false, message: 'Error in resending OTP' });
+        res.status(400).render('error', { message: 'Error in resending OTP' });
     }
 }
 
@@ -207,6 +234,7 @@ const verifyOTP = async (req, res) => {
         
     } catch (error) {
         console.log(error.message);
+        res.status(400).render('error', { message: error.message });
     }
 
 }
@@ -243,15 +271,20 @@ const userLogin = expressAsyncHandler( async (req, res) => {
 
 
 //User log out
-const getLogoutUser = expressAsyncHandler(async (req, res) => {
-    req.session.destroy((err) => {
+const getLogoutUser = async (req, res) => {
+    try {
+        req.session.destroy((err) => {
         if (err) {
             console.log(err.message);
         }
         console.log("Logged out");
         res.redirect("/login")
-    })
-}) 
+        })
+    } catch (error) {
+        console.log(error.message);
+        res.status(400).render('error', { message: error.message });
+    }
+}
 
 //Forget password Page Render
 const getForgetPassword = expressAsyncHandler( async(req, res) => {
@@ -324,7 +357,7 @@ const getResetPassword = expressAsyncHandler( async(req, res) => {
 })
 
 
-//
+//Password Resetting
 const resetPassword = expressAsyncHandler( async(req, res) => {
     const password = req.body.password;
     console.log("New password : ", password);
@@ -334,9 +367,109 @@ const resetPassword = expressAsyncHandler( async(req, res) => {
     res.redirect("/login")
 })
 
+//Shopping page for user
+const getShopPage = async (req, res) => {
+    try {
+        //const user = req.session.id;
+        const userId = req.session.user;
+        let sortOption = req.query.sort || ''; 
+        const searchQuery = req.query.search || '';
+
+//Search Products        
+        const searchCondition = searchQuery ? 
+        { productName: { $regex: searchQuery, $options: 'i' }, isBlocked: false } 
+        : { isBlocked: false };
+
+        const count = await Product.find(searchCondition).count();
+        const categories = await Category.find({ isListed: true });
+        const userData = await User.findById(userId, { isBlocked: false });
+
+        //console.log("USER :", userId);
+        console.log("USER DATA :", userData);
+//Pagination
+        let page = 1;
+        if (req.query.page) {
+            page = req.query.page;
+        }
+        let itemsPerPage = 6;
+//Sorting Logic
+        let sortCondition;
+        switch (sortOption) {
+            case 'price_high':
+                sortCondition = { salePrice: -1 };
+                break;
+            case 'price_low':
+                sortCondition = { salePrice: 1 };
+                break;
+            case 'name_asc':
+                sortCondition = { productName: 1 }; 
+                break;
+            case 'name_desc':
+                sortCondition = { productName: -1 };
+                break;
+            default:
+                sortCondition = {};
+        }
+
+        const languageSet = await Product.aggregate([
+            { $match: { isBlocked: false }},
+            { $group: { _id: '$language'}},
+            { $project: { _id: 0, language: '$_id' }}
+        ])
+        const languages = languageSet.map((item) => item.language);
+
+        const products = await Product.find(searchCondition)
+            .sort(sortCondition)
+            .limit(itemsPerPage * 1)
+            .skip((page - 1) * itemsPerPage)
+            .exec();
+
+        let totalPages = Math.ceil(count / itemsPerPage);
+
+        res.render("shop", {
+            products: products,
+            categories,
+            count: count,
+            currentPage: page,
+            totalPages,
+            userData,
+            languages
+        });
+    } catch (error) {
+        console.log(error.message);
+        res.status(400).render('error', { message: error.message });
+    }
+}
+
+
+//Product Details Page
+const getProductDetails = async (req, res) => {
+    try {
+        const user = req.session.user
+        console.log("user :", user);
+        const id = req.query.id
+        console.log("Query Id :", id);
+        const findProduct = await Product.findOne({ id: id });
+        const findCategory = await Category.findOne({name : findProduct.category})
+        // console.log(findCategory);
+       
+        console.log(findProduct.id, "Hello world");
+        if (user) {
+            res.render("product-details", { data: findProduct, user: user })
+        } else {
+            res.render("product-details", { data: findProduct })
+        }
+    } catch (error) {
+        console.log(error.message);
+        res.status(400).render('error', { message: error.message });
+    }
+}
+
 
 
 module.exports = { 
+    pageNotFound,
+    getContactUs,
     getHomePage,
     getSignupPage,
     getLoginPage,
@@ -350,7 +483,9 @@ module.exports = {
     forgetVerify,
     getResetPassword,
     resetPassword,
-    pageNotFound    
+    getShopPage,
+    getProductDetails,
+    securePassword    
 };
 
 

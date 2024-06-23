@@ -7,6 +7,8 @@ const adminController = require("../controller/adminController")
 const customerController = require("../controller/customerController")
 const categoryController = require("../controller/categoryController")
 const productController = require("../controller/productController")
+const couponController = require("../controller/couponController")
+const orderController = require("../controller/adminOrderController")
 
 const  {isAdmin} = require("../Athentication/auth")
 
@@ -34,12 +36,25 @@ router.post("/unBlockCategory", isAdmin, categoryController.unBlockCategory)
 //Product Management
 router.get("/products", isAdmin, productController.getAllProducts)
 router.get("/addProducts", isAdmin, productController.getProductAddPage)
-router.post("/addProducts", isAdmin, uploadProduct.array("productImage", 3), productController.addProducts)
+router.post("/addProducts", isAdmin, uploadProduct.array("productImage", 5), productController.addProducts)
 router.get("/editProduct", isAdmin, productController.getEditProduct)
 router.post("/editProduct/:id", isAdmin, uploadProduct.array("productImage", 5), productController.editProduct)
+router.delete("/deleteProductImage/:productId/:imageName", isAdmin, productController.deleteImage)
 router.post("/blockProduct", isAdmin, productController.blockProduct)
 router.post("/unBlockProduct", isAdmin, productController.unblockProduct)
 
+
+//Coupon Management
+router.get("/addCoupon", isAdmin, couponController.getAddCoupon)
+router.post("/addCoupon", isAdmin, couponController.addCoupon)
+router.get("/coupons", isAdmin, couponController.getAllCoupon)
+
+
+//Order Management
+router.get("/orders", isAdmin, orderController.getOrderListPage)
+router.post("/orders/status", isAdmin, orderController.changeOrderStatus)
+router.post("/orders/cancel", isAdmin, orderController.cancelOrder)
+router.get("/orders/orderDetails", isAdmin, orderController.getOrderDetails)
 
 
 module.exports = router;

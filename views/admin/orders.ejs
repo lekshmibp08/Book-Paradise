@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders List</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            height: 100vh;
+            background-color: #6f42c1;
+            padding-top: 20px;
+            color: white;
+            position: fixed;
+            left: 0;
+            width: 250px;
+            transition: left 0.3s;
+            text-align: center;
+        }
+        .sidebar a {
+            color: white;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+        }
+        .sidebar a:hover {
+            background-color: #5a36a3;
+        }
+        .top-bar {
+            background-color: #6f42c1;
+            color: white;
+            padding: 10px;
+            margin-left: 250px;
+            transition: margin-left 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .top-bar .search-bar {
+            margin-right: 20px;
+        }
+        .main-content {
+            padding: 20px;
+            margin-left: 250px;
+            transition: margin-left 0.3s;
+        }
+        .table thead th {
+            background-color: #6f42c1;
+            color: white;
+        }
+        .status-dropdown {
+            position: relative;
+            width: 145px;
+        }
+        .status-dropdown select {
+            border: none;
+            background: transparent;
+            color: inherit;
+            text-align: center;
+            appearance: none, !important;
+            -webkit-appearance: none; 
+            -moz-appearance: none;
+        }
+        .status-overlay {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            pointer-events: none;
+            border-radius: 5px;
+        }
+        .status-pending .status-overlay {
+            background-color: rgba(216, 67, 21, 0.1);
+        }
+        .status-processing .status-overlay {
+            background-color: rgba(255, 136, 0, 0.1);
+        }
+        .status-shipped .status-overlay {
+            background-color: rgba(0, 188, 212, 0.1);
+        }
+        .status-delivered .status-overlay {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+        .status-cancelled .status-overlay {
+            background-color: rgba(244, 67, 54, 0.1);
+        }
+        status-returned .status-overlay {
+            background-color: rgba(158, 158, 158, 0.1);
+        }
+        .update-btn {    
+            width: 145px;
+            border: antiquewhite;
+            background-color: #6f42c1;
+            color: white;
+            border-radius: 5px;
+        }
+        .cancel-btn {
+            width: 120px;
+            border: antiquewhite;
+            background-color: #6f42c1;
+            color: white;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                left: -250px;
+            }
+            .sidebar.active {
+                left: 0;
+            }
+            .top-bar {
+                margin-left: 0;
+            }
+            .top-bar.active {
+                margin-left: 250px;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .main-content.active {
+                margin-left: 250px;
+            }
+        }
+        .toggle-btn {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .toggle-btn {
+                display: block;
+                cursor: pointer;
+                margin-right: 20px;
+            }
+            .search-bar,
+            .user-info {
+                flex: 1;
+            }
+            .search-bar input {
+                width: 100%;
+            }
+        }
+        .header-content {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-content .search-bar {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        .header-content .add-product-btn {
+            margin-top: 10px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="sidebar" id="sidebar">
+                <div class="text-center mb-4">
+                    <img src="/adminAssets/assets/images/main-logo.png" alt="Books Paradise" class="img-fluid">
+                </div>
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/admin/products">Products</a>
+                <a href="/admin/users">Users</a>
+                <a href="/admin/Orders">Orders</a>
+                <a href="/admin/coupons">Coupons</a>
+                <a href="/admin/category">Categories</a>
+                <a href="/admin/logout">Log Out</a>
+            </div>
+            <div class="col-md-12">
+                <div class="top-bar" id="top-bar">
+                    <div class="d-flex align-items-center">
+                        <span class="toggle-btn" id="toggle-btn"><i class="fas fa-bars fa-2x"></i></span>
+                        <div class="search-bar">
+                            <input type="text" class="form-control" placeholder="Search">
+                        </div>
+                    </div>
+                    <div class="user-info d-flex align-items-center">
+                        <span>Hi Admin</span>
+                        <i class="fas fa-user-circle fa-2x ml-3"></i>
+                    </div>
+                </div>
+                <div class="main-content" id="main-content">
+                    <div class="d-flex justify-content-between align-items-center mb-3 header-content">
+                        <h2>Orders</h2>
+                        <div>
+                            <button class="btn btn-secondary">Filters</button>
+                            <button class="btn btn-primary">See More</button>
+                        </div>
+                    </div>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Sl.No:</th>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Payment Mode</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% orders.forEach((order, index) => { %>
+                            <tr class="status-processing">
+                                <td><%= index + 1 %></td>
+                                <td><%= order.orderId %></td>
+                                <td><%= format(order.createdAt, 'dd/MM/yyyy') %></td>
+                                <td><%= order.userId.name %></td>
+                                <td>₹ <%= order.totalAmount %></td>
+                                <td><%= order.paymentMethod %></td>
+                                <td>
+                                    <form action="/admin/orders/status" method="POST">
+                                        <div class="status-dropdown">
+                                            <div class="status-overlay"></div>
+                                            <select name="status" class="status-dropdown">
+                                                <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %> class="status-pending">Pending</option>
+                                                <option value="Processed" <%= order.status === 'Processed' ? 'selected' : '' %> class="status-processing">Processed</option>
+                                                <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %> class="status-shipped">Shipped</option>
+                                                <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %> class="status-delivered">Delivered</option>
+                                                <% if (order.status === 'Cancelled') { %>
+                                                    <option value="Cancelled" selected class="status-cancelled">Cancelled</option>
+                                                <% } %>                                                
+                                                <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %> class="status-returned">Returned</option>
+                                            </select>
+                                        </div>
+                                        <input type="hidden" name="orderId" value="<%= order._id %>">
+                                        <button class="update-btn" type="submit">
+                                            <i class="fas fa-save"></i> Update
+                                        </button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <a href="/admin/orders/orderDetails?id=<%= order._id %>">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </a><br>
+                                    <% if (order.status === 'Pending') { %>
+                                        <a href="#" onclick="cancelOrder('<%= order._id %>')">
+                                            <button class="cancel-btn">Cancel Order</button>
+                                        </a>                                    
+                                    <% } %>
+                                </td>
+                            </tr>
+                            <% }) %>
+                            <!-- Repeat similar rows as needed -->
+                        </tbody>
+                    </table>
+                    <nav>
+                        <ul class="pagination">
+                            <li class="page-item"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">4</a></li>
+                            <li class="page-item"><a class="page-link" href="#">5</a></li>
+                            <li class="page-item"><a class="page-link" href="#">...</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('toggle-btn').addEventListener('click', function() {
+            var sidebar = document.getElementById('sidebar');
+            var topBar = document.getElementById('top-bar');
+            var mainContent = document.getElementById('main-content');
+            sidebar.classList.toggle('active');
+            topBar.classList.toggle('active');
+            mainContent.classList.toggle('active');
+        });
+        document.querySelectorAll('.status-dropdown select').forEach(select => {
+            select.addEventListener('change', function() {
+                const tr = this.closest('tr');
+                tr.classList.remove('status-processing', 'status-shipped', 'status-delivered', 'status-pending');
+                tr.classList.add(`status-${this.value}`);
+            });
+        });
+//Sweet alert for Order Cancellation
+function cancelOrder(orderId) {
+    fetch(`/admin/orders/cancel?id=${orderId}`, { 
+        method: 'POST' 
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data.message);
+            if (data.message == "Order cancelled successfully") {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Order cancelled successfully',
+                }).then(() => {
+                    window.location.reload();
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message,
+                });
+            }
+        })
+        .catch(error => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while removing the product',
+            });
+            console.error('Error:', error);
+        });
+}
+
+
+    </script>
+</body>
+</html>

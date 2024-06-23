@@ -1,0 +1,54 @@
+<% if (userData && userData.wishlist && userData.wishlist.includes(product[i]._id)) { %>
+    <a href="javascript:void(0);" onclick="toggleWishlist('<%= product[i]._id %>')">
+        <i class="fa fa-heart" id="wishlist-icon-<%= product[i]._id %>" style="color: red;"></i>
+    </a>
+<% } else { %>
+    <a href="javascript:void(0);" onclick="toggleWishlist('<%= product[i]._id %>')">
+        <i class="fa fa-heart" id="wishlist-icon-<%= product[i]._id %>" style="color: white;"></i>
+    </a>
+<% } %>   
+
+
+<script>
+            
+    function toggleWishlist(productId) {
+        $.ajax({
+            url: `/wishlist?id=${productId}`,
+            type: 'POST',
+            success: function(response) {
+                console.log('Success response:', response);
+                Swal.fire({
+                    title: response.message,
+                    text: 'Continue Shopping',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            
+                // Dynamically change the color of the wishlist icon
+                const icon = document.getElementById(`wishlist-icon-${productId}`);
+                if (icon) {
+                    if (response.added) {
+                        icon.style.color = 'red';
+                    } else {
+                        icon.style.color = 'white';
+                    }
+                }
+            },
+            error: function(error) {
+                console.log('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: error.responseJSON.message || 'Something went wrong!',
+                    icon: 'error',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        });
+    }
+    </script>
+
+
+
+

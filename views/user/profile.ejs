@@ -1,0 +1,371 @@
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        
+        .profile-container, .address-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .profile-container h2, .address-container h4 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .profile-details, .address-details {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .profile-details li, .address-details li {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .profile-details li:last-child, .address-details li:last-child {
+            border-bottom: none;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .edit-address-button, .delete-address-button {
+            display: block;
+            width: 48%;
+            padding: 10px;
+            text-align: center;
+            background-color: #3F69AA;
+            color: #fff;
+            text-decoration: none;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .edit-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            text-align: center;
+            background-color: #3F69AA;
+            color: #fff;
+            text-decoration: none;
+            border: none;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        
+        .add-address-button {
+            display: block;
+            width: 200px;
+            margin-left: 580px;
+            position: absolute;
+            padding: 10px;
+            text-align: center;
+            background-color: #3F69AA;
+            color: #fff;
+            text-decoration: none;
+            border: none;
+            border-radius: 4px;
+            margin-top: -15px;
+        }
+        
+        .edit-button:hover, .add-address-button:hover, .edit-address-button:hover{
+            background-color: #0f9308;
+            color: #fff;
+        }
+
+        .form.delete-address-button:hover {
+            background-color: red;
+            color: black;
+        }
+        
+        @media (max-width: 600px) {
+            .profile-details li, .address-details li {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        
+            .profile-details li span, .address-details li span {
+                margin-bottom: 5px;
+            }
+        
+            .button-container {
+                flex-direction: column;
+            }
+                
+            .add-address-button {
+                width: 100%;
+                margin-left: 0;
+                position: static;
+            }
+        }
+
+    </style>
+
+<%- include("../partials/header") %>
+
+
+    <!-- Breadcrumb Start -->
+    <div class="breadcrumb-wrap">
+        <div class="container">
+            <ul class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">Home</a></li>
+                <li class="breadcrumb-item"><a href="#">My Account</a></li>
+                <li class="breadcrumb-item active">Profile</li>
+            </ul>
+        </div>
+    </div>
+    <!-- Breadcrumb End -->
+
+    <!-- My Account Start -->
+    <div class="my-account">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="nav flex-column nav-pills" role="tablist" aria-orientation="vertical">
+                        <a class="nav-link active" id="dashboard-nav" data-toggle="pill" href="#dashboard-tab" role="tab">Profile</a>
+                        <a class="nav-link" id="orders-nav" data-toggle="pill" href="#orders-tab" role="tab">Orders</a>
+                        <a class="nav-link" id="payment-nav" data-toggle="pill" href="#payment-tab" role="tab">Payment Method</a>
+                        <a class="nav-link" id="address-nav" data-toggle="pill" href="#address-tab" role="tab">Address</a>
+                        <a class="nav-link" id="account-nav" data-toggle="pill" href="#account-tab" role="tab">Password Settings</a>
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="dashboard-tab" role="tabpanel" aria-labelledby="dashboard-nav">
+                            <div class="profile-container">
+                                <h2>Profile Details</h2>
+                                <ul class="profile-details">
+                                    <li><span>Full Name</span><span><%= userData.name %></span></li>
+                                    <li><span>Mobile Number</span><span><%= userData.mobile %></span></li>
+                                    <li><span>Email ID</span><span><%= userData.email %></span></li>
+                                </ul>
+                                <a href="/edit-profile" class="edit-button">EDIT</a>
+                            </div>
+                        </div>
+                        <!-- Other tabs content -->
+                        
+                        <div class="tab-pane fade" id="address-tab" role="tabpanel" aria-labelledby="address-nav">
+                            <div>
+                                <a href="/add-new-address" class="add-address-button">+ Add New Address</a>
+                            </div>
+                            <h4>Saved Address</h4>
+                            <div class="address-container">
+                                <% userAddress.forEach(function(address) { %>
+                                <ul class="address-details">
+                                    <li><span>Full Name</span><span><%= address.name %></span></li>
+                                    <li><span>Mobile Number</span><span><%= address.mobile %></span></li>
+                                    <li><span>Address</span><span><%= address.addressLine %> <br> <%= address.locality %>, <%= address.city %>, <br> <%= address.state %>, <%= address.pin %></span></li>
+                                    <li><span>Type</span><span><%= address.addressType %></span></li>
+                                </ul>
+                                <div class="button-container">
+                                    <a href="/edit-address/<%= address._id %>" class="edit-address-button">EDIT</a>
+                                    <form action="/delete-address/<%= address._id %>" method="post">
+                                        <button type="submit" class="delete-btn">Delete Address</button>
+                                    </form>
+                                </div>
+                                <% }); %>
+                            </div>
+                        </div>
+                        <!-- Other tabs content -->
+
+                        
+                        <div class="tab-pane fade" id="orders-tab" role="tabpanel" aria-labelledby="orders-nav">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Order ID</th>
+                                            <th>No. of Items</th>
+                                            <th>Order Date</th>
+                                            <th>Total Amount</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% orderData.forEach((order, index) => { %>
+                                        <tr>
+                                            <td><%= index + 1 %></td>
+                                            <td><%= order.orderId %></td>
+                                            <td><%= order.items.length %></td>
+                                            <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                                            <td>₹ <%= order.totalAmount %></td>
+                                            <td><%= order.status %></td>
+                                            <td>
+                                                <button onclick="location.href='/view-order/<%= order._id %>'" style="width:90px;">View</button>
+                                                <% if (order.status === 'Pending') { %>
+                                                        <a href="#" onclick="cancelOrder('<%= order._id %>')">
+                                                            <button style="background-color: red; color: white; width:90px;">Cancel</button>        
+                                                        </a>                                                                                        
+                                                <% } else if (order.status === 'Delivered') { %>
+                                                    <form action="/return-order/<%= order._id %>" method="GET" style="display:inline;">
+                                                        <button type="submit" style="background-color: orange; width:90px; color: white;">Return</button>
+                                                    </form>
+                                                <% } else if (order.status === 'Request Processed') { %>
+                                                    <form action="/cancel-return/<%= order._id %>" method="POST">
+                                                        <button type="submit" style="background-color: grey; color: white; width:90px; height: 60px">Cancel Request</button>
+                                                    </form>
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="payment-tab" role="tabpanel" aria-labelledby="payment-nav">
+                            <h4>Payment Method</h4>
+                            <p>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. In condimentum quam ac mi
+                                viverra dictum. In efficitur ipsum diam, at dignissim lorem tempor in. Vivamus tempor
+                                hendrerit finibus. Nulla tristique viverra nisl, sit amet bibendum ante suscipit non.
+                                Praesent in faucibus tellus, sed gravida lacus. Vivamus eu diam eros. Aliquam et sapien
+                                eget arcu rhoncus scelerisque.
+                            </p>
+                        </div>
+                        <div class="tab-pane fade" id="address-tab" role="tabpanel" aria-labelledby="address-nav">
+                            <h4>Address</h4>
+                            <div>
+                                <a href="/add-new-address" class="btn btn-info" style="position: absolute; left:650px; top:20px">+ Add New
+                                    Address</a>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>Payment Address</h5>
+                                    <p>123 Payment Street, Los Angeles, CA</p>
+                                    <p>Mobile: 012-345-6789</p>
+                                    <button>Edit Address</button>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Shipping Address</h5>
+                                    <p>123 Shipping Street, Los Angeles, CA</p>
+                                    <p>Mobile: 012-345-6789</p>
+                                    <button>Edit Address</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="account-tab" role="tabpanel" aria-labelledby="account-nav">
+                            <form action="/change-password/<%= userData._id %>" method="post" id="change-password-form">
+                                <h4>Change Password</h4>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <input type="password" name="currentPassword" placeholder="Current Password" required>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <input type="password" name="newPassword" placeholder="New Password" required>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <input type="password" name="confirmPassword" placeholder="Confirm Password" required>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <button type="submit">Change Password</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- My Account End -->
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("change-password-form");
+
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const data = {
+            currentPassword: formData.get("currentPassword"),
+            newPassword: formData.get("newPassword"),
+            confirmPassword: formData.get("confirmPassword")
+        };
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: result.message
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: result.message
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An unexpected error occurred. Please try again later.'
+            });
+        }
+    });
+});
+
+//Sweet alert for Order Cancellation
+function cancelOrder(orderId) {
+    fetch(`/cancel-order?id=${orderId}`, { 
+        method: 'POST' 
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data.message);
+            if (data.message == "Order cancelled successfully") {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Order cancelled successfully',
+                }).then(() => {
+                    window.location.reload();
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message,
+                });
+            }
+        })
+        .catch(error => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while removing the product',
+            });
+            console.error('Error:', error);
+        });
+}
+</script>
+
+    <%- include("../partials/footer") %>

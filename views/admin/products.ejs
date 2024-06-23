@@ -180,7 +180,7 @@
                         <tbody>
                             <% products.forEach(product => { %>
                             <tr>
-                                <td><img src="/uploads/product-images/<%= product.productImage.length > 0 ? product.productImage[0] : '/path/to/default/image.jpg' %>" alt="<%= product.name %>" class="img-fluid" style="max-width: 50px;"></td>
+                                <td><img src="/uploads/product-images/<%= product.productImage.length > 0 ? product.productImage[0] : '/adminAssets/assets/images/defaultImage.png' %>" alt="<%= product.name %>" class="img-fluid" style="max-width: 50px;"></td>
                                 <td><%= product.productName %></td>
                                 <td><%= product.category %></td>
                                 <td>Rs.<%= product.regularPrice %></td>

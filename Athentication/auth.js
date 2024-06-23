@@ -2,16 +2,22 @@ const User = require("../models/userModel")
 
 const isLogged = (req, res, next)=>{
     if(req.session.user){
+        console.log("Inner Auth Working");
         User.findById({_id : req.session.user}).lean()
         .then((data)=>{
-            if(data.isBlocked == false){
+            if (data && data.isBlocked == false){
                 next()
             }else{
+                console.error('User not found');
                 res.redirect("/login")
             }
         })
+        .catch(err => {
+            console.log(error.message);
+            res.redirect("/login");
+        });
     }else{
-        res.redirect("/login")
+        res.render("login", { message: "User not found. Please Login" })
     }
 }
 

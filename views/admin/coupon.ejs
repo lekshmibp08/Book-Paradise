@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coupon</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            height: 100vh;
+            background-color: #6f42c1;
+            padding-top: 20px;
+            color: white;
+            position: fixed;
+            left: 0;
+            width: 250px;
+            transition: left 0.3s;
+            text-align: center;
+            z-index: 2;
+        }
+        .sidebar a {
+            color: white;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+        }
+        .sidebar a:hover {
+            background-color: #5a36a3;
+        }
+        .top-bar {
+            background-color: #6f42c1;
+            color: white;
+            padding: 10px;
+            margin-left: 250px;
+            transition: margin-left 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .top-bar .search-bar {
+            margin-right: 20px;
+        }
+        .main-content {
+            padding: 20px;
+            margin-left: 250px;
+            transition: margin-left 0.3s;
+        }
+        .coupon-table {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+            text-align: center;
+        }
+        .status-active {
+            background-color: limegreen;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .status-expired {
+            background-color: brown;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .status-select {
+            width: 100%;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+        }
+        .status-select option {
+            color: black;
+            font-weight: normal;
+        }
+        .status-active option[value="activated"],
+        .status-expired option[value="expired"] {
+            color: white;
+        }
+        .status-active option {
+            background-color: limegreen;
+        }
+        .status-expired option {
+            background-color: brown;
+        }
+        .action-icons i {
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .action-icons i:hover {
+            color: #6f42c1;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                left: -250px;
+            }
+            .sidebar.active {
+                left: 0;
+            }
+            .top-bar {
+                margin-left: 0;
+            }
+            .top-bar.active {
+                margin-left: 250px;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .main-content.active {
+                margin-left: 250px;
+            }
+        }
+        .toggle-btn {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .toggle-btn {
+                display: block;
+                cursor: pointer;
+                margin-right: 20px;
+            }
+            .search-bar,
+            .user-info {
+                flex: 1;
+            }
+            .search-bar input {
+                width: 100%;
+            }
+        }
+        .header-content {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-content .search-bar {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        .header-content .add-coupon-btn {
+            margin-top: 10px;
+            flex-shrink: 0;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="sidebar" id="sidebar">
+                <div class="text-center mb-4">
+                    <img src="/adminAssets/assets/images/main-logo.png" alt="Books Paradise" class="img-fluid">
+                </div>
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/admin/products">Products</a>
+                <a href="/admin/users">Users</a>
+                <a href="/admin/Orders">Orders</a>
+                <a href="/admin/coupons">Coupons</a>
+                <a href="/admin/category">Categories</a>
+                <a href="/admin/logout">Log Out</a>
+            </div>
+            <div class="col-md-12">
+                <div class="top-bar" id="top-bar">
+                    <div class="d-flex align-items-center">
+                        <span class="toggle-btn" id="toggle-btn"><i class="fas fa-bars fa-2x"></i></span>
+                        <div class="search-bar">
+                            <input type="text" class="form-control" placeholder="Search">
+                        </div>
+                    </div>
+                    <div class="user-info d-flex align-items-center">
+                        <span>Hi Admin</span>
+                        <i class="fas fa-user-circle fa-2x ml-3"></i>
+                    </div>
+                </div>
+                <div class="main-content" id="main-content">
+                    <div class="header-content">
+                        <h2>Coupon</h2>
+                        <a href="/admin/addCoupon" class="btn btn-primary add-coupon-btn">+ Add Coupon</a>
+
+                    </div>
+                    <div class="coupon-table">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>Coupon Name</th>
+                                    <th>Coupon Status</th>
+                                    <th>Coupon Code</th>
+                                    <th>Minimum Purchase</th>
+                                    <th>Discount %</th>
+                                    <th>Maximum Discount</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% coupons.forEach((coupon, index) =>{ %>
+                                    <tr>
+                                        <td><%= index + 1 %></td>
+                                        <td><%= coupon.name %></td>
+                                        <td>
+                                            <% if (new Date(coupon.expiryDate) < currentDate) { %>
+                                                <span class="status-expired">Expired</span>
+                                            <% } else if (coupon.status === true) { %>
+                                                <span class="status-active">Activated</span>
+                                            <% } else { %>
+                                                <span class="status-inactive">Inactive</span>
+                                            <% } %>
+                                        </td>
+                                        <td><%= coupon.code %></td>
+                                        <td>₹ <%= coupon.minAmount %></td>
+                                        <td><%= coupon.discount %>%</td>
+                                        <td>₹ <%= coupon.maxDiscount %></td>
+                                        <td class="action-icons">                                            
+                                            <i class="fas fa-edit ml-3"></i>
+                                            <i class="fas fa-trash ml-3"></i>
+                                        </td>
+                                    </tr>                                
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('toggle-btn').addEventListener('click', function() {
+            var sidebar = document.getElementById('sidebar');
+            var topBar = document.getElementById('top-bar');
+            var mainContent = document.getElementById('main-content');
+            sidebar.classList.toggle('active');
+            topBar.classList.toggle('active');
+            mainContent.classList.toggle('active');
+        });
+
+    </script>
+</body>
+</html>

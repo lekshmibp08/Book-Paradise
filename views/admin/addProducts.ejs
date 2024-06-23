@@ -7,7 +7,7 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
     <link id="stylesheet" rel="stylesheet" href="/adminAssets/assets/css/addProduct.css">
-
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container-fluid">
@@ -79,14 +79,37 @@
                                     <input name="authorDetails" type="text" class="form-control" placeholder="Author details">
                                     <label class="form-label">Quantity</label>
                                     <input name="quantity" type="number" class="form-control" placeholder="Quantity">
-                                    <div class="media-upload">
-                                        <h3>Media</h3>
-                                        <div class="form-group">
-                                            <input name="productImage" type="file" class="form-control-file" multiple>
+                                    <div class="product-form-bottom">
+
+                                        <!-- input file for image upload but the button is display is set as none -->
+                                        <input type="file" id="product-image-upload" name="productImage" accept="image/png, image/jpeg" multiple class="d-none">
+                        
+                                        <!-- using the label the image is uploaded -->
+                                        <label for="product-image-upload" class="btn btn-warning">
+                                            <i class="fas fa-upload"></i> &nbsp; Choose Images
+                                        </label>
+                        
+                                        <!-- the product preview will generate based on what we select -->
+                                        <div id="product-image-preview"></div>
+                        
+                        
+                                        <!-- the form submission and cancel buttons -->
+                                        <div>
+                                            <a href="/admin/product" class="btn btn-secondary">Cancel</a>
+                                            <button class="btn btn-success" type="submit">Add Product</button>
                                         </div>
                                     </div>
-                                    <button type="submit" class="btn btn-add-product">Add Product</button>
                                 </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="cropper-modal">
+                        <div id="cropper-container">
+                            <img id="cropper-image">
+                            <div id="cropper-buttons">
+                                <button id="crop-cancel" class="btn btn-secondary">Cancel</button>
+                                <button id="crop-confirm" class="btn btn-primary">Crop</button>
                             </div>
                         </div>
                     </div>
@@ -94,6 +117,7 @@
             </div>
         </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -130,6 +154,94 @@
                 console.error('Error:', error);
                 alert('An error occurred while adding the product.');
             }
+        });
+
+        const productImageUpload = document.getElementById('product-image-upload');
+        const productImagePreview = document.getElementById('product-image-preview');
+        const cropperModal = document.getElementById('cropper-modal');
+        const cropperImage = document.getElementById('cropper-image');
+        const cropCancel = document.getElementById('crop-cancel');
+        const cropConfirm = document.getElementById('crop-confirm');
+        let cropper;
+        let files = [];
+        let currentFileIndex;
+
+        productImageUpload.addEventListener('change', () => {
+            productImagePreview.innerHTML = '';
+            files = Array.from(productImageUpload.files);
+            if (files.length > 4) {
+                alert("Maximum file count is 4");
+                productImageUpload.value = '';
+                files = [];
+                return;
+            }
+            if (files.length === 0) {
+                alert("Minimum file count is 1");
+                productImageUpload.value = '';
+                files = [];
+                return;
+            }
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = e.target.result;
+                    imgElement.classList.add('preview-img');
+
+                    const imageBox = document.createElement('div');
+                    imageBox.classList.add('product-image-box');
+                    imageBox.appendChild(imgElement);
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.classList.add('delete-button');
+                    deleteButton.addEventListener('click', () => {
+                        files.splice(index, 1);
+                        imageBox.remove();
+                    });
+                    imageBox.appendChild(deleteButton);
+
+                    productImagePreview.appendChild(imageBox);
+
+                    imgElement.addEventListener('click', () => {
+                        cropperImage.src = e.target.result;
+                        cropperModal.style.display = 'block';
+                        cropper = new Cropper(cropperImage, {
+                            aspectRatio: 1,
+                            viewMode: 1,
+                            movable: true,
+                            zoomable: true,
+                            rotatable: true,
+                            scalable: true,
+                        });
+                        currentFileIndex = index;
+                    });
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        cropCancel.addEventListener('click', () => {
+            cropperModal.style.display = 'none';
+            cropper.destroy();
+        });
+
+        cropConfirm.addEventListener('click', () => {
+            const canvas = cropper.getCroppedCanvas();
+            canvas.toBlob((blob) => {
+                const croppedFile = new File([blob], files[currentFileIndex].name, { type: 'image/jpeg' });
+                files[currentFileIndex] = croppedFile;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imgElement = productImagePreview.children[currentFileIndex].querySelector('.preview-img');
+                    imgElement.src = e.target.result;
+                };
+                reader.readAsDataURL(croppedFile);
+
+                cropperModal.style.display = 'none';
+                cropper.destroy();
+            });
         });
     </script>
 </body>

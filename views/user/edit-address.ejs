@@ -1,0 +1,96 @@
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+
+    .address-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    form label {
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    form input, form select {
+        margin-bottom: 15px;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    form button {
+        padding: 10px;
+        font-size: 16px;
+        background-color: #3F69AA;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    form button:hover {
+        background-color: #0f9308;
+    }
+</style>
+
+<%- include("../partials/header") %>
+
+<!-- Breadcrumb Start -->
+<div class="breadcrumb-wrap">
+    <div class="container">
+        <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">My Account</a></li>
+            <li class="breadcrumb-item"><a href="/product">Address</a></li>
+            <li class="breadcrumb-item active">Edit-Address</li>
+        </ul>
+    </div>
+</div>
+<!-- Breadcrumb End -->
+
+<div class="address-container">
+    <h2>Edit Your Address</h2>
+    <form action="/edit-address/<%= userData._id %>" method="post">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" value="<%= userData.name %>">
+        <label for="mobile">Mobile</label>
+        <input type="text" id="mobile" name="mobile" value="<%= userData.mobile %>">
+        <label for="address">Address</label>
+        <input type="text" id="address" name="address" value="<%= userData.addressLine %>">
+        <label for="locality">Locality</label>
+        <input type="text" id="locality" name="locality" value="<%= userData.locality %>">
+        <label for="city">City</label>
+        <input type="text" id="city" name="city" value="<%= userData.city %>">
+        <label for="state">State</label>
+        <input type="text" id="state" name="state" value="<%= userData.state %>">
+        <label for="pincode">Pincode</label>
+        <input type="text" id="pincode" name="pincode" value="<%= userData.pin %>">
+        <label for="addressType">Address Type</label>
+        <select id="addressType" name="addressType" >
+            <option value="home">Home</option>
+            <option value="office">Office</option>
+            <option value="other">Other</option>
+        </select>
+        <button type="submit">Save Changes</button>
+    </form>
+</div>
+
+<%- include("../partials/footer") %>
+

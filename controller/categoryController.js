@@ -37,6 +37,7 @@ const unBlockCategory = async (req, res) => {
         res.redirect("/admin/category")
     } catch (error) {
         console.log(error.message);
+        res.status(400).render('error', { message: error.message });
     }
 }
 
@@ -50,6 +51,7 @@ const blockCategory = async (req, res) => {
         res.redirect("/admin/category")
     } catch (error) {
         console.log(error.message);
+        res.status(400).render('error', { message: error.message });
     }
 }
 
