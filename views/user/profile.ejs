@@ -110,6 +110,12 @@
                 position: static;
             }
         }
+        .position-relative {
+            position: relative;
+        }
+        .position-absolute {
+            position: absolute;
+        }
 
     </style>
 
@@ -263,14 +269,17 @@
                             <form action="/change-password/<%= userData._id %>" method="post" id="change-password-form">
                                 <h4>Change Password</h4>
                                 <div class="row">
-                                    <div class="col-md-12">
-                                        <input type="password" name="currentPassword" placeholder="Current Password" required>
+                                    <div class="col-md-12 position-relative">
+                                        <input type="password" id="currentPassword" name="currentPassword" placeholder="Current Password" required>
+                                        <i class="fa fa-eye position-absolute togglePassword" style="cursor: pointer; right: 30px; top: 35%; transform: translateY(-50%);"></i>
                                     </div>
-                                    <div class="col-md-12">
-                                        <input type="password" name="newPassword" placeholder="New Password" required>
+                                    <div class="col-md-12 position-relative">
+                                        <input type="password" id="newPassword" name="newPassword" placeholder="New Password" required>
+                                        <i class="fa fa-eye position-absolute togglePassword" style="cursor: pointer; right: 30px; top: 35%; transform: translateY(-50%);"></i>
                                     </div>
-                                    <div class="col-md-12">
-                                        <input type="password" name="confirmPassword" placeholder="Confirm Password" required>
+                                    <div class="col-md-12 position-relative">
+                                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required>
+                                        <i class="fa fa-eye position-absolute togglePassword" style="cursor: pointer; right: 30px; top: 35%; transform: translateY(-50%);"></i>
                                     </div>
                                     <div class="col-md-12">
                                         <button type="submit">Change Password</button>
@@ -284,6 +293,25 @@
         </div>
     </div>
     <!-- My Account End -->
+    <!-- Bootstrap 5 JS-Bundle CDN import: -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const togglePasswordElements = document.querySelectorAll(".togglePassword");
+    
+            togglePasswordElements.forEach(function(togglePassword) {
+                togglePassword.addEventListener("click", function() {
+                    const input = this.previousElementSibling;
+                    const type = input.getAttribute("type") === "password" ? "text" : "password";
+                    input.setAttribute("type", type);
+    
+                    this.classList.toggle("fa-eye");
+                    this.classList.toggle("fa-eye-slash");
+                });
+            });
+        });
+    </script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {

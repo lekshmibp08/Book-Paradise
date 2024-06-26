@@ -9,6 +9,12 @@
     <link id="stylesheet" rel="stylesheet" href="/adminAssets/assets/css/addProduct.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
 
+    <style>
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+        }
+    </style>
 
 </head>
 <body>
@@ -47,6 +53,89 @@
                         <div class="col-lg-8">
                             <div class="product-add-form">
                                 <h5>Product Details</h5>
+                                
+                                <form action="/admin/editProduct/<%= product._id %>" method="POST" id="product-form" enctype="multipart/form-data">
+                                    <label class="form-label">Product title</label>
+                                    <input type="text" name="productName" class="form-control" value="<%= product.productName %>">
+                                    <div id="productName-error" class="error-message"></div>
+                
+                                    <label class="form-label">Full description</label>
+                                    <textarea name="description" class="form-control" rows="5"><%= product.description %></textarea>
+                                    <div id="description-error" class="error-message"></div>
+                
+                                    <div class="row">
+                                        <div class="col">
+                                            <label class="form-label">Regular price</label>
+                                            <input name="regularPrice" type="text" class="form-control" value="<%= product.regularPrice %>">
+                                            <div id="regularPrice-error" class="error-message"></div>
+                                        </div>
+                                        <div class="col">
+                                            <label class="form-label">Promotional Price</label>
+                                            <input name="salePrice" type="text" class="form-control" value="<%= product.salePrice %>">
+                                            <div id="salePrice-error" class="error-message"></div>
+                                        </div>
+                                        <div class="col">
+                                            <label class="form-label">Category</label>
+                                            <select name="category" class="form-control">
+                                                <% for (let i=0; i < category.length; i++) { %>
+                                                    <option value="<%= category[i].name %>" <%= category[i].name === product.category ? 'selected' : '' %>>
+                                                        <%= category[i].name %>
+                                                    </option>
+                                                <% } %>                                                
+                                            </select>
+                                            <div id="category-error" class="error-message"></div>
+                                        </div>
+                                    </div>
+                
+                                    <label class="form-label">Language</label>
+                                    <input name="language" type="text" class="form-control" value="<%= product.language %>">
+                                    <div id="language-error" class="error-message"></div>
+                
+                                    <label class="form-label">Author Title</label>
+                                    <input name="authorTitle" type="text" class="form-control" value="<%= product.authorTitle %>">
+                                    <div id="authorTitle-error" class="error-message"></div>
+                
+                                    <label class="form-label">Author details</label>
+                                    <input name="authorDetails" type="text" class="form-control" value="<%= product.authorDetails %>">
+                                    <div id="authorDetails-error" class="error-message"></div>
+                
+                                    <label class="form-label">Quantity</label>
+                                    <input name="quantity" type="number" class="form-control" value="<%= product.quantity %>">
+                                    <div id="quantity-error" class="error-message"></div>
+                
+                                    <div class="media-upload">
+                                        <h3>Media</h3>
+                                        <div id="addedImagesContainer" class="col-md-6">
+                                            <% for (let i=0; i < product.productImage.length; i++) { %>
+                                                <div class="col-md-12 mb-4" id="image-<%= i %>">
+                                                    <div class="row">
+                                                        <div class="col-12">
+                                                            <img class="rounded" style="width: 50px; height: 60px;"
+                                                                src="/uploads/product-images/<%= product.productImage[i] %>"
+                                                                alt="image" data-filename="<%= product.productImage[i] %>">
+                                                            <span class="delete-icon"
+                                                                onclick="deleteImage('<%= product._id %>', '<%= product.productImage[i] %>', '<%= i %>' )">❌</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                        <div class="product-form-bottom">
+                                            <input type="file" id="product-image-upload" name="productImage" accept="image/png, image/jpeg" multiple class="d-none">
+                                            <label for="product-image-upload" class="btn btn-warning">
+                                                <i class="fas fa-upload"></i> &nbsp; Choose Images
+                                            </label>
+                                            <div id="product-image-preview"></div>
+                                            <div>
+                                                <a href="/admin/products" class="btn btn-secondary">Cancel</a>
+                                                <button class="btn btn-success" type="submit">Update</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+
+                            <!--
+                                
                                 <form action="/admin/editProduct/<%=product._id%>" method="POST" id="product-form" enctype="multipart/form-data">
                                     <label class="form-label">Product title</label>
                                     <input type="text" name="productName" class="form-control" value="<%= product.productName %>">
@@ -61,17 +150,17 @@
                                             <label class="form-label">Promotional Price</label>
                                             <input name="salePrice" type="text" class="form-control" value="<%= product.salePrice %>">
                                         </div>
+
                                         <div class="col">
                                             <label class="form-label">Category</label>
                                             <select name="category" class="form-control">
-                                                <option value="">Select Category</option>
-                                                <% for (let i=0; i < category.length; i++) { %>
-                                                    <option value="<%= category[i].name %>">
+                                                <% for (let i = 0; i < category.length; i++) { %>
+                                                    <option value="<%= category[i].name %>" <%= category[i].name === product.category ? 'selected' : '' %>>
                                                         <%= category[i].name %>
                                                     </option>
                                                 <% } %>                                                
                                             </select>
-                                        </div>
+                                        </div>                                     
                                     </div>
                                     <label class="form-label">Language</label>
                                     <input name="language" type="text" class="form-control" value="<%= product.language %>">
@@ -99,27 +188,37 @@
                                                 <% } %>
                                         </div>
                                         <div class="product-form-bottom">
+                            -->
+                                            
 
                                             <!-- input file for image upload but the button is display is set as none -->
-                                            <input type="file" id="product-image-upload" name="productImage" accept="image/png, image/jpeg" multiple class="d-none">
+                            <!--            <input type="file" id="product-image-upload" name="productImage" accept="image/png, image/jpeg" multiple class="d-none">        -->
                             
                                             <!-- using the label the image is uploaded -->
+                                            <!--
                                             <label for="product-image-upload" class="btn btn-warning">
                                                 <i class="fas fa-upload"></i> &nbsp; Choose Images
                                             </label>
-                            
+                                            -->
                                             <!-- the product preview will generate based on what we select -->
+                                             <!--
                                             <div id="product-image-preview"></div>
-                            
+                                            -->
                             
                                             <!-- the form submission and cancel buttons -->
+                            <!--
                                             <div>
-                                                <a href="/admin/product" class="btn btn-secondary">Cancel</a>
+                                                <a href="/admin/products" class="btn btn-secondary">Cancel</a>
                                                 <button class="btn btn-success" type="submit">Update</button>
                                             </div>
                                         </div>
                                     </div>
                                 </form>
+                            -->
+                            
+                            
+                            
+                            
                             </div>
                         </div>
                     </div>
@@ -314,6 +413,90 @@
             }
         });
 
+    
+        document.getElementById('product-form').addEventListener('submit', function(event) {
+            let isValid = true;
+    
+            const productName = document.getElementsByName('productName')[0].value.trim();
+            const description = document.getElementsByName('description')[0].value.trim();
+            const regularPrice = document.getElementsByName('regularPrice')[0].value.trim();
+            const salePrice = document.getElementsByName('salePrice')[0].value.trim();
+            const category = document.getElementsByName('category')[0].value.trim();
+            const language = document.getElementsByName('language')[0].value.trim();
+            const authorTitle = document.getElementsByName('authorTitle')[0].value.trim();
+            const authorDetails = document.getElementsByName('authorDetails')[0].value.trim();
+            const quantity = document.getElementsByName('quantity')[0].value.trim();
+    
+            // Clear previous error messages
+            document.getElementById('productName-error').innerText = '';
+            document.getElementById('description-error').innerText = '';
+            document.getElementById('regularPrice-error').innerText = '';
+            document.getElementById('salePrice-error').innerText = '';
+            document.getElementById('category-error').innerText = '';
+            document.getElementById('language-error').innerText = '';
+            document.getElementById('authorTitle-error').innerText = '';
+            document.getElementById('authorDetails-error').innerText = '';
+            document.getElementById('quantity-error').innerText = '';
+    
+            // Validate Product Name
+            if (productName === '') {
+                document.getElementById('productName-error').innerText = 'Product name is required.';
+                isValid = false;
+            }
+    
+            // Validate Description
+            if (description === '') {
+                document.getElementById('description-error').innerText = 'Description is required.';
+                isValid = false;
+            }
+    
+            // Validate Regular Price
+            if (regularPrice === '' || isNaN(regularPrice) || Number(regularPrice) <= 0) {
+                document.getElementById('regularPrice-error').innerText = 'Valid regular price is required.';
+                isValid = false;
+            }
+    
+            // Validate Sale Price
+            if (salePrice === '' || isNaN(salePrice) || Number(salePrice) <= 0) {
+                document.getElementById('salePrice-error').innerText = 'Valid sale price is required.';
+                isValid = false;
+            }
+    
+            // Validate Category
+            if (category === '') {
+                document.getElementById('category-error').innerText = 'Category is required.';
+                isValid = false;
+            }
+    
+            // Validate Language
+            if (language === '') {
+                document.getElementById('language-error').innerText = 'Language is required.';
+                isValid = false;
+            }
+    
+            // Validate Author Title
+            if (authorTitle === '') {
+                document.getElementById('authorTitle-error').innerText = 'Author title is required.';
+                isValid = false;
+            }
+    
+            // Validate Author Details
+            if (authorDetails === '') {
+                document.getElementById('authorDetails-error').innerText = 'Author details are required.';
+                isValid = false;
+            }
+    
+            // Validate Quantity
+            if (quantity === '' || isNaN(quantity) || Number(quantity) <= 0) {
+                document.getElementById('quantity-error').innerText = 'Valid quantity is required.';
+                isValid = false;
+            }
+    
+            // If form is invalid, prevent submission
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
     </script>
 </body>
 </html>

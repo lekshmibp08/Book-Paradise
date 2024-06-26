@@ -44,12 +44,8 @@ const changeOrderStatus = async( req, res ) =>{
     try {
         const orderId = req.body.orderId;
         const status = req.body.status;
-        if( status === 'Cancelled' ){
-
-        } else {
             await Order.updateOne({ _id: orderId}, { status })
             res.redirect('/admin/orders')
-        }
     } catch (error) {
         console.log('ERROR: ', error.message);
         res.status(400).render('error', { message: error.message });

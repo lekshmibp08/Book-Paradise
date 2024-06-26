@@ -747,10 +747,26 @@ button.btn {
     border-radius: 0;
 }
 
-.product-view .pagination .page-item:hover .page-link,
-.product-view .pagination .page-item.active .page-link {
+.product-view .pagination .page-item:hover .page-link {
     color: #ffffff;
     background: #3F69AA;
+}
+.product-view .pagination .page-item.active .page-link {
+    color: #ffffff; 
+    background: #3F69AA; 
+    border-color:  #3F69AA; 
+}
+.product-status {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(255, 0, 0, 0.8); 
+    color: white;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 5px;
+    z-index: 5; 
 }
 
 

@@ -367,32 +367,36 @@ const resetPassword = expressAsyncHandler( async(req, res) => {
     res.redirect("/login")
 })
 
+
 //Shopping page for user
 const getShopPage = async (req, res) => {
     try {
-        //const user = req.session.id;
         const userId = req.session.user;
         let sortOption = req.query.sort || ''; 
         const searchQuery = req.query.search || '';
+        const categoryFilters = req.query.categories ? req.query.categories.split(',') : [];
+        const languageFilters = req.query.languages ? req.query.languages.split(',') : [];
 
-//Search Products        
-        const searchCondition = searchQuery ? 
-        { productName: { $regex: searchQuery, $options: 'i' }, isBlocked: false } 
-        : { isBlocked: false };
+        console.log("SORT: ", sortOption);
+        console.log("SEARCH: ", searchQuery);
+
+// Search and Filter Products
+        const searchCondition = {
+            productName: { $regex: searchQuery, $options: 'i' },
+            isBlocked: false,
+        };
+        if (categoryFilters.length > 0) {
+            searchCondition.category = { $in: categoryFilters };
+        }
+        if (languageFilters.length > 0) {
+            searchCondition.language = { $in: languageFilters };
+        }
 
         const count = await Product.find(searchCondition).count();
         const categories = await Category.find({ isListed: true });
         const userData = await User.findById(userId, { isBlocked: false });
 
-        //console.log("USER :", userId);
-        console.log("USER DATA :", userData);
-//Pagination
-        let page = 1;
-        if (req.query.page) {
-            page = req.query.page;
-        }
-        let itemsPerPage = 6;
-//Sorting Logic
+//Sorting Conditions
         let sortCondition;
         switch (sortOption) {
             case 'price_high':
@@ -411,12 +415,21 @@ const getShopPage = async (req, res) => {
                 sortCondition = {};
         }
 
+//Filter based on language        
         const languageSet = await Product.aggregate([
             { $match: { isBlocked: false }},
             { $group: { _id: '$language'}},
             { $project: { _id: 0, language: '$_id' }}
         ])
         const languages = languageSet.map((item) => item.language);
+
+//Pagination
+        let page = 1;
+        if (req.query.page) {
+            page = req.query.page;
+        }
+        let itemsPerPage = 6;
+
 
         const products = await Product.find(searchCondition)
             .sort(sortCondition)
@@ -432,8 +445,12 @@ const getShopPage = async (req, res) => {
             count: count,
             currentPage: page,
             totalPages,
+            searchQuery,
+            sortOption,
             userData,
-            languages
+            languages,
+            categoryFilters,
+            languageFilters
         });
     } catch (error) {
         console.log(error.message);

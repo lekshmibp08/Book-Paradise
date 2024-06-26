@@ -21,11 +21,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(nocache());
 
 app.use(session({
-    secret: 'secret',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: {
-        maxAge: 72 * 60 * 60 * 1000,
+        maxAge: parseInt(process.env.SESSION_MAX_AGE, 10),
         httpOnly: true
     }
 }))

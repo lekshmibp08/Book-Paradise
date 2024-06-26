@@ -1,10 +1,6 @@
-PRODUCT DETAILS
 
-
-    
     <%- include("../partials/header") %>
     
-        
         <!-- Breadcrumb Start -->
         <div class="breadcrumb-wrap">
             <div class="container">
@@ -24,21 +20,39 @@ PRODUCT DETAILS
                 <div class="row">
                     <div class="col-lg-9">
                         <div class="row align-items-center product-detail-top">
-                            
+
                             <div class="col-md-5">
-                                <div>
-                                    <% for (let j = 0; j < data.productImage.length; j++) { %>
-                                        <img style="width: 30px; height: auto;"
-                                        src="/uploads/product-images/<%= data.productImage[j] %>" alt="<%= data.productName %>">
-                                    <% } %>
+                                <% if (data.quantity === 0) { %>
+                                    <div class="product-status">sold out</div>
+                                <% } %>
+                                <div id="zoom" style="z-index: 2;">
+                                    <img id="zoom-image" 
+                                         src="/uploads/product-images/<%= data.productImage[0] %>" alt="<%= data.productName %>">
                                 </div>
-                                <div id="zoom" style="background: blueviolet;" >
-                                    <img style="width: 30px; height: auto;"
-                                        src="/uploads/product-images/<%= data.productImage[0] %>" alt="<%= data.productName %>">
+                                <div class="thumb-nails">
+                                    <% for (let j = 0; j < data.productImage.length; j++) { %>
+                                        <img class="thumbnail" style="width: 60px; height: auto; cursor: pointer;"
+                                             src="/uploads/product-images/<%= data.productImage[j] %>" alt="<%= data.productName %>">
+                                    <% } %>
                                 </div>
                             </div>
 
-                            <div class="col-md-7">
+                            <!--
+                            <div class="col-md-5">
+                                <div id="zoom" style="z-index: 2;" >
+                                    <img style="width: 20px; height: auto;"
+                                    src="/uploads/product-images/<%= data.productImage[0] %>" alt="<%= data.productName %>">
+                                </div>
+                                <div class="thumb-nails">
+                                    <% for (let j = 0; j < data.productImage.length; j++) { %>
+                                        <img style="width: 60px; height: auto;"
+                                        src="/uploads/product-images/<%= data.productImage[j] %>" alt="<%= data.productName %>">
+                                    <% } %>
+                                </div>
+                            </div>
+                            -->
+                            
+                            <div class="col-md-7">                                
                                 <div class="product-content">
                                     <div class="title">
                                         <h2><%= data.productName %></h2>
@@ -75,6 +89,7 @@ PRODUCT DETAILS
                                         <a href="#"><i class="fa fa-heart"></i></a>
                                         <a href="#"><i class="fa fa-search"></i></a>
                                     </div>
+                                    
                                 </div>
                             </div>
                         </div>
@@ -318,22 +333,29 @@ PRODUCT DETAILS
         </div>
         <!-- Product Detail End -->
 
-<script>
 
-//window.onload = function() {
+<script>
+//Image Zooming
         var options = {
-            width: 400,
+            width: 300,
             height: 400,
             zoomWidth: 400,
-            zoomStyle: 'opacity: 1;background-color: white;',
-            zoomLensStyle: 'opacity: 1;background-color: white;',
-            offset: { vertical: 0, horizontal: 10 },
-            scale: 1.5
+            scale: 1
         };
         new ImageZoom(document.getElementById('zoom'), options);
-//    };
     
-    
+        document.addEventListener("DOMContentLoaded", function() {
+            const thumbnails = document.querySelectorAll(".thumbnail");
+            const zoomImage = document.getElementById("zoom-image");
+
+            thumbnails.forEach(thumbnail => {
+                thumbnail.addEventListener("click", function() {
+                    zoomImage.src = this.src;
+                });
+            });
+        });
+        
+
 function addToCart(productId) {
     const quantity = document.getElementById('quantity').value;
 
