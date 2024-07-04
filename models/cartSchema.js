@@ -16,6 +16,10 @@ const cartSchema = new Mongoose.Schema({
           type: String,
           required: true
         },
+        MRP: {
+          type: Number,
+          required: true
+        },
         price: {
           type: Number,
           required: true
@@ -31,7 +35,19 @@ const cartSchema = new Mongoose.Schema({
       type: Number,
       default: 0 
     },
-    
+    totalMRP : {
+      type: Number,
+      default: 0
+    },
+    discount: {
+      type: Number,
+      default: 0
+    },
+    couponApplied: {
+      type: Mongoose.Schema.Types.ObjectId,
+      ref: "Coupon",
+      default: null
+    },
     createdOn: {
       type: Date,
       default: Date.now

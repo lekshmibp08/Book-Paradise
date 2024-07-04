@@ -4,6 +4,7 @@ const expressAsyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
 const Product = require("../models/productModel")
 const Category = require("../models/categoryModel")
+const Cart = require('../models/cartSchema')
 const randomstring = require("randomstring");
 
 
@@ -38,14 +39,16 @@ const securePassword = expressAsyncHandler(async (password) => {
 //Load Home Page
 const getHomePage = async(req, res) => {
     try {
-        const user = req.session.user
-        const userData = await User.findOne({})
-        const productData = await Product.find({ isBlocked: false }).sort({ id: -1 }).limit(6)
-        if (user) {
-            res.render("home", { user: userData, products: productData })
-        } else {
-            res.render("home", { products: productData })
-        }
+        const userId = req.session.user
+        const user = await User.findById(userId)
+        const productData = await Product.find({ isBlocked: false })
+        const cart = await Cart.findOne({userId: userId})
+
+        console.log(userId);
+        console.log(cart);
+        
+        res.render("home", { user, productData, cart })
+        
     } catch (error) {
         console.log(error.message);
         res.status(400).render('error', { message: error.message });
@@ -369,6 +372,7 @@ const resetPassword = expressAsyncHandler( async(req, res) => {
 
 
 //Shopping page for user
+//Shopping page for user
 const getShopPage = async (req, res) => {
     try {
         const userId = req.session.user;
@@ -457,6 +461,7 @@ const getShopPage = async (req, res) => {
         res.status(400).render('error', { message: error.message });
     }
 }
+
 
 
 //Product Details Page

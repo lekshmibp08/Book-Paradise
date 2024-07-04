@@ -6,7 +6,7 @@
     <title>Add Products</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
-    <link id="stylesheet" rel="stylesheet" href="/adminAssets/assets/css/addProduct.css">
+    <link id="stylesheet" rel="stylesheet" href="/adminAssets/assets/css/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
 </head>
 <body>
@@ -20,6 +20,7 @@
                 <a href="/admin/products">Products</a>
                 <a href="/admin/users">Users</a>
                 <a href="/admin/Orders">Orders</a>
+                <a href="/admin/return-orders">Returned Orders</a>
                 <a href="/admin/coupons">Coupons</a>
                 <a href="/admin/category">Categories</a>
                 <a href="/admin/logout">Log Out</a>
@@ -47,21 +48,27 @@
                                 <h5>Product Details</h5>
                                 <form action="/admin/addProducts" method="POST" id="product-form" enctype="multipart/form-data">
                                     <label class="form-label">Product title</label>
-                                    <input type="text" name="productName" class="form-control" placeholder="Product title">
+                                    <input type="text" name="productName" id="productName" class="form-control" placeholder="Product title" required>
+                                    <div class="error-message" id="productNameError"></div>
+
                                     <label class="form-label">Full description</label>
-                                    <textarea name="description" class="form-control" rows="5" placeholder="Full description"></textarea>
+                                    <textarea name="description" id="description" class="form-control" rows="5" placeholder="Full description"></textarea>
+                                    <div class="error-message" id="descriptionError"></div>
+
                                     <div class="row">
                                         <div class="col">
                                             <label class="form-label">Regular price</label>
-                                            <input name="regularPrice" type="text" class="form-control" placeholder="Regular price">
+                                            <input name="regularPrice" id="regularPrice" type="number" class="form-control" placeholder="Regular price" required>
+                                            <div class="error-message" id="regularPriceError"></div>
                                         </div>
                                         <div class="col">
                                             <label class="form-label">Promotional Price</label>
-                                            <input name="salePrice" type="text" class="form-control" placeholder="Promotional Price">
+                                            <input name="salePrice" id="salePrice" type="number" class="form-control" placeholder="Promotional Price" required>
+                                            <div class="error-message" id="salePriceError"></div>
                                         </div>
                                         <div class="col">
                                             <label class="form-label">Category</label>
-                                            <select name="category" class="form-control">
+                                            <select name="category" id="category" class="form-control">
                                                 <option value="">Select Category</option>
                                                 <% for (let i=0; i < category.length; i++) { %>
                                                     <option value="<%= category[i].name %>">
@@ -69,16 +76,26 @@
                                                     </option>
                                                 <% } %>                                                
                                             </select>
+                                            <div class="error-message" id="categoryError"></div>
                                         </div>
                                     </div>
                                     <label class="form-label">Language</label>
-                                    <input name="language" type="text" class="form-control" placeholder="Language">
+                                    <input name="language" id="language" type="text" class="form-control" placeholder="Language">
+                                    <div class="error-message" id="languageError"></div>
+                                
                                     <label class="form-label">Author title</label>
-                                    <input name="authorTitle" type="text" class="form-control" placeholder="Author title">
+                                    <input name="authorTitle" id="authorTitle" type="text" class="form-control" placeholder="Author title">
+                                    <div class="error-message" id="authorTitleError"></div>
+                                
                                     <label class="form-label">Author details</label>
-                                    <input name="authorDetails" type="text" class="form-control" placeholder="Author details">
+                                    <input name="authorDetails" id="authorDetails" type="text" class="form-control" placeholder="Author details">
+                                    <div class="error-message" id="authorDetailsError"></div>
+                                
                                     <label class="form-label">Quantity</label>
-                                    <input name="quantity" type="number" class="form-control" placeholder="Quantity">
+                                    <input name="quantity" id="quantity" type="number" class="form-control" placeholder="Quantity">
+                                    <div class="error-message" id="quantityError"></div>
+
+                                    
                                     <div class="product-form-bottom">
 
                                         <!-- input file for image upload but the button is display is set as none -->
@@ -121,6 +138,8 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.16.7/dist/sweetalert2.all.min.js"></script>
+
     <script>
         document.getElementById('toggle-btn').addEventListener('click', function() {
             var sidebar = document.getElementById('sidebar');
@@ -131,31 +150,7 @@
             mainContent.classList.toggle('active');
         });
 
-        document.getElementById('product-form').addEventListener('submit', async function (e) {
-            e.preventDefault(); // Prevent the default form submission
-            const form = e.target;
-            const formData = new FormData(form);
-
-            try {
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const result = await response.json();
-
-                if (result.status === 'success') {
-                    alert(result.message);
-                    window.location.href = "/admin/products"; // Redirect after alert
-                } else {
-                    alert(result.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred while adding the product.');
-            }
-        });
-
+        
         const productImageUpload = document.getElementById('product-image-upload');
         const productImagePreview = document.getElementById('product-image-preview');
         const cropperModal = document.getElementById('cropper-modal');
@@ -243,6 +238,125 @@
                 cropper.destroy();
             });
         });
+
+            
+document.getElementById('product-form').addEventListener('submit', async function (event) {
+    event.preventDefault(); // Prevent the default form submission
+    
+    // Call the validation function
+    if (!validateForm(event)) {
+        return; // If validation fails, prevent form submission
+    }
+
+    const form = event.target;
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: result.message,
+            confirmButtonText: 'OK'
+        }).then(() =>{
+
+            window.location.href = "/admin/products"; 
+        })
+        } else {
+            Swal.fire({
+            icon: 'error',
+            title: 'Failed to add Product',
+            text: result.message,
+            confirmButtonText: 'OK'
+        })
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while adding the product.');
+    }
+});
+
+function validateForm(event) {
+    var productName = document.getElementById('productName').value.trim();
+    var description = document.getElementById('description').value.trim();
+    var regularPrice = document.getElementById('regularPrice').value;
+    var salePrice = document.getElementById('salePrice').value;
+    var language = document.getElementById('language').value.trim();
+    var authorTitle = document.getElementById('authorTitle').value.trim();
+    var authorDetails = document.getElementById('authorDetails').value.trim();
+    var quantity = document.getElementById('quantity').value;
+    
+    var errors = false;
+
+    document.querySelectorAll('.error-message').forEach(function(errorMessage) {
+        errorMessage.innerText = "";
+    });
+
+    if (!productName) {
+        document.getElementById('productNameError').innerText = "Product Name is required";
+        errors = true;
+    }
+
+    if (!description) {
+        document.getElementById('descriptionError').innerText = "Description is required";
+        errors = true;
+    }
+
+    if (regularPrice <= 0) {
+        document.getElementById('regularPriceError').innerText = "Must be greater than 0";
+        errors = true;
+    }
+
+    if (salePrice <= 0) {
+        document.getElementById('salePriceError').innerText = "Must be greater than 0";
+        errors = true;
+    }
+
+    if (!category) {
+        document.getElementById('categoryError').innerText = "Category is required";
+        errors = true;
+    }
+
+    if (!language) {
+        document.getElementById('languageError').innerText = "Language is required";
+        errors = true;
+    }
+
+    if (!authorTitle) {
+        document.getElementById('authorTitleError').innerText = "Author title is required";
+        errors = true;
+    }
+
+    if (!authorDetails) {
+        document.getElementById('authorDetailsError').innerText = "Author details are required";
+        errors = true;
+    }
+
+    if (quantity <= 0) {
+        document.getElementById('quantityError').innerText = "Must be greater than 0";
+        errors = true;
+    }
+
+    if (errors) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Form Validation Error',
+            text: 'Please correct the highlighted errors and try again.',
+            confirmButtonText: 'OK'
+        });
+    }
+
+    return !errors;
+}                    
+
+
     </script>
 </body>
 </html>

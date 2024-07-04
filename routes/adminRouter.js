@@ -9,6 +9,7 @@ const categoryController = require("../controller/categoryController")
 const productController = require("../controller/productController")
 const couponController = require("../controller/couponController")
 const orderController = require("../controller/adminOrderController")
+const returnOrders = require('../controller/returnOrders')
 
 const  {isAdmin} = require("../Athentication/auth")
 
@@ -48,6 +49,10 @@ router.post("/unBlockProduct", isAdmin, productController.unblockProduct)
 router.get("/addCoupon", isAdmin, couponController.getAddCoupon)
 router.post("/addCoupon", isAdmin, couponController.addCoupon)
 router.get("/coupons", isAdmin, couponController.getAllCoupon)
+router.patch('/coupons/:id/block', isAdmin, couponController.blockCoupon)
+router.patch('/coupons/:id/unblock', isAdmin, couponController.unblockCoupon)
+router.get('/coupons/:id/edit', isAdmin, couponController.getEditCoupon)
+router.put('/coupons/:id/edit', isAdmin, couponController.updateCoupon)
 
 
 //Order Management
@@ -55,6 +60,11 @@ router.get("/orders", isAdmin, orderController.getOrderListPage)
 router.post("/orders/status", isAdmin, orderController.changeOrderStatus)
 router.post("/orders/cancel", isAdmin, orderController.cancelOrder)
 router.get("/orders/orderDetails", isAdmin, orderController.getOrderDetails)
+
+//Return Orders
+router.get("/return-orders", isAdmin, returnOrders.getReturnOrders)
+router.get("/return-orders/:id", isAdmin, returnOrders.viewReturnOrderDetails)
+router.post("/return-orders/:id/status", isAdmin, returnOrders.updateReturnOrderStatus)
 
 
 module.exports = router;

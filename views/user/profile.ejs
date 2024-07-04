@@ -142,7 +142,7 @@
                     <div class="nav flex-column nav-pills" role="tablist" aria-orientation="vertical">
                         <a class="nav-link active" id="dashboard-nav" data-toggle="pill" href="#dashboard-tab" role="tab">Profile</a>
                         <a class="nav-link" id="orders-nav" data-toggle="pill" href="#orders-tab" role="tab">Orders</a>
-                        <a class="nav-link" id="payment-nav" data-toggle="pill" href="#payment-tab" role="tab">Payment Method</a>
+                        <a class="nav-link" id="wallet" data-toggle="pill" href="#wallet-tab" role="tab">Wallet</a>
                         <a class="nav-link" id="address-nav" data-toggle="pill" href="#address-tab" role="tab">Address</a>
                         <a class="nav-link" id="account-nav" data-toggle="pill" href="#account-tab" role="tab">Password Settings</a>
                         <a class="nav-link" href="/logout">Logout</a>
@@ -203,21 +203,31 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <% orderData.forEach((order, index) => { %>
+                                        <% orderData.forEach((order, index) => { 
+                                            const totalAmount = order.totalAmount || 0;
+                                            const couponDiscount = order.couponDiscount || 0;
+                                            const finalAmount = (Number(totalAmount) - Number(couponDiscount) + 50).toFixed(2);
+
+                                            const deliveredAt = new Date(order.updatedAt);
+                                            const now = new Date();
+                                            const oneWeekInMilliseconds = 7 * 24 * 60 * 60 * 1000;
+                                            const isReturnEligible = (now - deliveredAt) < oneWeekInMilliseconds;
+                                        %>
+
                                         <tr>
                                             <td><%= index + 1 %></td>
                                             <td><%= order.orderId %></td>
                                             <td><%= order.items.length %></td>
                                             <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
-                                            <td>₹ <%= order.totalAmount %></td>
+                                            <td>₹ <%= finalAmount %></td>
                                             <td><%= order.status %></td>
                                             <td>
                                                 <button onclick="location.href='/view-order/<%= order._id %>'" style="width:90px;">View</button>
-                                                <% if (order.status === 'Pending') { %>
+                                                <% if (order.status === 'Pending' || order.status === 'Processed' || order.status === 'Shipped') { %>
                                                         <a href="#" onclick="cancelOrder('<%= order._id %>')">
                                                             <button style="background-color: red; color: white; width:90px;">Cancel</button>        
                                                         </a>                                                                                        
-                                                <% } else if (order.status === 'Delivered') { %>
+                                                <% } else if (order.status === 'Delivered' && isReturnEligible) { %>
                                                     <form action="/return-order/<%= order._id %>" method="GET" style="display:inline;">
                                                         <button type="submit" style="background-color: orange; width:90px; color: white;">Return</button>
                                                     </form>
@@ -234,15 +244,66 @@
                             </div>
                         </div>
 
-                        <div class="tab-pane fade" id="payment-tab" role="tabpanel" aria-labelledby="payment-nav">
-                            <h4>Payment Method</h4>
-                            <p>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. In condimentum quam ac mi
-                                viverra dictum. In efficitur ipsum diam, at dignissim lorem tempor in. Vivamus tempor
-                                hendrerit finibus. Nulla tristique viverra nisl, sit amet bibendum ante suscipit non.
-                                Praesent in faucibus tellus, sed gravida lacus. Vivamus eu diam eros. Aliquam et sapien
-                                eget arcu rhoncus scelerisque.
-                            </p>
+                        <div class="tab-pane fade" id="wallet-tab" role="tabpanel" aria-labelledby="wallet-nav">
+                            <section class="user-dashboard page-wrapper">
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="dashboard-wrapper user-dashboard">
+                                                <div class="wallet-summary">
+                                                    <h2>Wallet Balance: ₹ <%= wallet.balance %> </h2>
+                                                    <a href="/wallet/add-money" class="add-money-button">Add Money</a>
+                                                </div>
+                                                <hr class="wallet-summary-hr">
+                        
+                                                <div class="filter-form">
+                                                    <h3 class="sort-header">Sort Transactions</h3>
+                                                    <form action="/wallet" method="get" class="form-inline">
+                                                        <div class="form-group sort-group">
+                                                            <label for="sort" class="sort-label">Sort by:</label>
+                                                            <select id="sort" name="sort" class="form-control">
+                                                                <option value="">Select</option>
+                                                                <option value="maxAmount">Maximum Price</option>
+                                                                <option value="minAmount">Minimum Price</option>
+                                                                <option value="oldDate">Old Date</option>
+                                                                <option value="newDate">New Date</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <button type="submit" class="btn">Apply Sort</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                        
+                                                <div class="table-responsive">
+                                                    <h3>Transaction History</h3>
+                                                    <table class="table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Date</th>
+                                                                <th>Type</th>
+                                                                <th>Amount</th>
+                                                                <th>Status</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <% transactions.forEach(function(transaction) { %>
+                                                                <tr>
+                                                                    <td><%= new Date(transaction.createdAt).toLocaleDateString() %> </td>
+                                                                    <td><%= transaction.type %></td>
+                                                                    <td>₹ <%= transaction.amount %></td>
+                                                                    <td><%= transaction.status %></td>
+                                                                </tr>
+                                                            <% }); %>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            
                         </div>
                         <div class="tab-pane fade" id="address-tab" role="tabpanel" aria-labelledby="address-nav">
                             <h4>Address</h4>
@@ -271,15 +332,15 @@
                                 <div class="row">
                                     <div class="col-md-12 position-relative">
                                         <input type="password" id="currentPassword" name="currentPassword" placeholder="Current Password" required>
-                                        <i class="fa fa-eye position-absolute togglePassword" style="cursor: pointer; right: 30px; top: 35%; transform: translateY(-50%);"></i>
+                                        <i class="fa fa-eye-slash position-absolute togglePassword" style="cursor: pointer; right: 30px; top: 35%; transform: translateY(-50%);"></i>
                                     </div>
                                     <div class="col-md-12 position-relative">
                                         <input type="password" id="newPassword" name="newPassword" placeholder="New Password" required>
-                                        <i class="fa fa-eye position-absolute togglePassword" style="cursor: pointer; right: 30px; top: 35%; transform: translateY(-50%);"></i>
+                                        <i class="fa fa-eye-slash position-absolute togglePassword" style="cursor: pointer; right: 30px; top: 35%; transform: translateY(-50%);"></i>
                                     </div>
                                     <div class="col-md-12 position-relative">
                                         <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required>
-                                        <i class="fa fa-eye position-absolute togglePassword" style="cursor: pointer; right: 30px; top: 35%; transform: translateY(-50%);"></i>
+                                        <i class="fa fa-eye-slash position-absolute togglePassword" style="cursor: pointer; right: 30px; top: 35%; transform: translateY(-50%);"></i>
                                     </div>
                                     <div class="col-md-12">
                                         <button type="submit">Change Password</button>
@@ -306,12 +367,26 @@
                     const type = input.getAttribute("type") === "password" ? "text" : "password";
                     input.setAttribute("type", type);
     
-                    this.classList.toggle("fa-eye");
                     this.classList.toggle("fa-eye-slash");
+                    this.classList.toggle("fa-eye");
                 });
             });
         });
     </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get('tab');
+
+        if (tab) {
+            const targetTab = document.querySelector(`a[data-toggle="pill"][href="#${tab}-tab"]`);
+            if (targetTab) {
+                targetTab.click();
+            }
+        }
+    });
+</script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -343,6 +418,8 @@
                     icon: 'success',
                     title: 'Success!',
                     text: result.message
+                }).then(() => {
+                    window.location.href = '/profile?tab=account';
                 });
             } else {
                 Swal.fire({
@@ -363,36 +440,50 @@
 
 //Sweet alert for Order Cancellation
 function cancelOrder(orderId) {
-    fetch(`/cancel-order?id=${orderId}`, { 
-        method: 'POST' 
-    })
-        .then(response => response.json())
-        .then(data => {
-            console.log(data.message);
-            if (data.message == "Order cancelled successfully") {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Order cancelled successfully',
-                }).then(() => {
-                    window.location.reload();
-                });
-            } else {
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you really want to cancel this order?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, cancel it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+
+            fetch(`/cancel-order?id=${orderId}`, { 
+                method: 'POST' 
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.message);
+                if (data.flag) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: data.message,
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message,
+                    });
+                }
+            })
+            .catch(error => {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: data.message,
+                    text: 'ERROR: An error occurred while canceling the order',
                 });
-            }
-        })
-        .catch(error => {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'An error occurred while removing the product',
+                console.error('Error:', error);
             });
-            console.error('Error:', error);
-        });
+        }
+    });
 }
 </script>
 

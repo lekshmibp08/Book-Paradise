@@ -30,6 +30,10 @@ const orderSchema = new Schema({
         type: Number,
         required: true
     },
+    couponDiscout: {
+        type: Number,
+        default: 0
+    },
     billingAddress: {
         type: Schema.Types.ObjectId,
         ref: 'address',

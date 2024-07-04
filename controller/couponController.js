@@ -56,8 +56,79 @@ const addCoupon = async( req, res ) =>{
     }
 }
 
+//Block Coupon
+const blockCoupon = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const coupon = await Coupon.findByIdAndUpdate(id, { status: false }, { new: true });
+        if (!coupon) {
+            return res.status(404).json({ message: 'Coupon not found' });
+        }
+        res.status(200).json({ message: 'Coupon blocked successfully', coupon });
+    } catch (error) {
+        res.status(400).render('error', { message: error.message });
+    }
+}
+
+
+//Unblock A Coupon
+const unblockCoupon = async( req, res ) =>{
+    try {
+        const { id } = req.params;
+        const coupon = await Coupon.findByIdAndUpdate(id, { status: true }, { new: true });
+        if (!coupon) {
+            return res.status(404).json({ message: 'Coupon not found' });
+        }
+        res.status(200).json({ message: 'Coupon unblocked successfully', coupon });
+    } catch (error) {
+        res.status(400).render('error', { message: error.message });
+    }
+}
+
+//Get Edit Coupon Page
+const getEditCoupon = async( req, res ) =>{
+    try {
+        const id = req.params.id;
+        const coupon = await Coupon.findById(id);
+        if( !coupon ){
+            return res.status(404).json({ message: 'Coupon not found' });
+        }
+        console.log(coupon);
+        res.status(200).render('editCoupon', {coupon})
+    } catch (error) {
+        res.status(400).render('error', { message: error.message });
+    }
+}
+
+//Edit Coupon Details
+const updateCoupon = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { couponName, couponCode, description, minPurchaseAmount, discount, maxDiscount, expiryDate } = req.body;
+
+        await Coupon.findByIdAndUpdate(id, {
+            name: couponName,
+            code: couponCode,
+            description,
+            minAmount: minPurchaseAmount,
+            discount,
+            maxDiscount,
+            expiryDate
+        });
+
+        res.redirect('/admin/coupons');
+    } catch (error) {
+        res.status(400).render('error', { message: error.message });
+    }
+};
+
+
 module.exports = {
     getAddCoupon,
     addCoupon,
-    getAllCoupon
+    getAllCoupon,
+    blockCoupon,
+    unblockCoupon,
+    getEditCoupon,
+    updateCoupon
 }

@@ -5,6 +5,7 @@ const dotenv = require("dotenv").config()
 const bodyParser = require("body-parser");
 const session = require("express-session")
 const nocache = require("nocache")
+const methodOverride = require('method-override');
 
 
 const dbConnect = require("./config/dbConnect");
@@ -19,6 +20,8 @@ dbConnect();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(nocache());
+app.use(methodOverride('_method'));
+
 
 app.use(session({
     secret: process.env.SESSION_SECRET,

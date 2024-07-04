@@ -56,6 +56,7 @@ const addToCart = async (req, res) => {
                     // Remove the product from the cart
                     cartExist.items.splice(itemIndex, 1);
                     cartExist.totalPrice = cartExist.items.reduce((acc, item) => acc + (item.price * item.itemQuantity), 0);
+                    cartExist.totalMRP = cartExist.items.reduce((acc, item) => acc + (item.MRP * item.itemQuantity), 0);
                     await cartExist.save();
                     return res.status(200).json({ status: "Product Removed from the Cart" });
                 } else {
@@ -66,6 +67,7 @@ const addToCart = async (req, res) => {
                         cartExist.items[itemIndex].itemQuantity = quantity;
                         cartExist.items[itemIndex].price = product.salePrice;
                         cartExist.totalPrice = cartExist.items.reduce((acc, item) => acc + (item.price * item.itemQuantity), 0);
+                        cartExist.totalMRP = cartExist.items.reduce((acc, item) => acc + (item.MRP * item.itemQuantity), 0);
                         await cartExist.save();
                         return res.status(200).json({ status: "Product Cart Updated" });
                     } else {
@@ -81,10 +83,12 @@ const addToCart = async (req, res) => {
                         cartExist.items.push({
                             product: productId,
                             name: product.productName,
+                            MRP: product.regularPrice,
                             price: product.salePrice,
                             itemQuantity: quantity
                         });
                         cartExist.totalPrice = cartExist.items.reduce((acc, item) => acc + (item.price * item.itemQuantity), 0);
+                        cartExist.totalMRP = cartExist.items.reduce((acc, item) => acc + (item.MRP * item.itemQuantity), 0);
                         await cartExist.save();
                         return res.status(200).json({ status: "Product Added to Cart" });
                     } else {
@@ -108,10 +112,12 @@ const addToCart = async (req, res) => {
                         items: [{
                             product: productId,
                             name: product.productName,
+                            MRP: product.regularPrice,
                             price: product.salePrice,
                             itemQuantity: quantity
                         }],
                         totalPrice: product.salePrice * quantity,
+                        totalMRP: product.regularPrice * quantity,
                         createdOn: Date.now()
                     });
                     await newCart.save();
@@ -129,7 +135,7 @@ const addToCart = async (req, res) => {
     } catch (error) {
         console.log(error.message);
         res.status(400).render('error', { message: error.message });
-    }
+    }
 };
 
 
@@ -153,6 +159,7 @@ const changeQuantity = async (req, res) => {
             } else {
                 cart.items[productIndex].itemQuantity = newQuantity;
                 cart.totalPrice = cart.items.reduce((acc, item) => acc + (item.price * item.itemQuantity), 0);
+                cart.totalMRP = cart.items.reduce((acc, item) => acc + (item.MRP * item.itemQuantity), 0);
                 await cart.save();
             }
 
@@ -221,7 +228,83 @@ const showCoupons = async( req, res ) =>{
         })*/
        console.log(couponData);
        //console.log("subtotal :", subTotal);
-        res.json(couponData)
+       res.json({ success: true, coupons: couponData }); 
+        //res.json(couponData)
+    } catch (error) {
+        console.log("Error Message : ", error.message);
+        res.status(400).render('error', { message: error.message });
+    }
+}
+
+
+//Apply Coupon
+const applyCoupon = async( req, res ) =>{
+    try {
+        console.log(req.body);
+        const userId = req.session.user;
+        const { couponId } = req.body;
+        const coupon = await Coupon.findById(couponId);
+        const user = await User.findById(userId);
+        if( !user) {
+            console.log("NO USER");
+            return res.status(401).json({ success: false, message: 'User not Found. Please Login...' });
+        }
+        const couponUsed = await Coupon.findOne({
+            _id : couponId,
+            usedBy : userId
+        })
+        if( couponUsed ) {
+            console.log("COUPON USED");
+            return res.status(401).json({ success: false, message: 'A User can use a Coupon only once.' });
+        }
+        const cart = await Cart.findOne({userId : userId})
+        if( cart.totalPrice < coupon.minAmount) {
+            console.log("MINIMUM PURCHACE AMAOUNT");
+            return res.status(400).json({ success: false, message: `Minimum Purchase Amound should be above ₹. ${coupon.minAmount}` });
+        }
+
+        let couponDiscount = (cart.totalPrice * coupon.discount) / 100
+
+        if(couponDiscount > coupon.maxDiscount){
+            console.log("MAX DISCOUNT");
+            couponDiscount = coupon.maxDiscount;
+        }
+
+        const totalSave = cart.totalMRP - cart.totalPrice + couponDiscount;
+        const grandTotal = cart.totalPrice + 50 - couponDiscount;
+        await Cart.updateOne({userId : userId}, 
+            {discount: couponDiscount, couponApplied: couponId}, {new:true});
+
+            console.log("NEW CART:",cart );
+
+            res.json({
+                success: true,
+                message: 'Coupon applied successfully',
+                totalSave,
+                grandTotal
+            });
+
+    } catch (error) {
+        console.log("Error Message : ", error.message);
+        res.status(400).render('error', { message: error.message });
+    }
+}
+
+
+//Remove Applied Coupon
+const removeCoupon = async( req, res ) =>{
+    try {
+        const userId = req.session.user;
+        const cart = await Cart.findOne({userId: userId});
+        if( cart.couponApplied ){
+            cart.couponApplied = null;
+            cart.discount = 0;
+            await cart.save();
+
+            res.json({ success: true, message: 'Coupon removed successfully' });
+        } else {
+            res.status(400).json({ success: false, message: 'No coupon is applied to the cart' });
+        }
     } catch (error) {
         console.log("Error Message : ", error.message);
         res.status(400).render('error', { message: error.message });
@@ -234,5 +317,7 @@ module.exports = {
     addToCart,
     changeQuantity,
     deleteCartProduct,
-    showCoupons
+    showCoupons,
+    applyCoupon,
+    removeCoupon
 }

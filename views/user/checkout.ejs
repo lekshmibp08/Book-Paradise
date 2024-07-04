@@ -1,5 +1,7 @@
 <%- include("../partials/header") %>        
 
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <!-- Breadcrumb Start -->
 <div class="breadcrumb-wrap">
     <div class="container">
@@ -29,12 +31,12 @@
                                         <%= address.city %>, <br>
                                         <%= address.state %> - <%= address.pin %> <br>
                                     </label>
-                                    <div>
-                                        <a href="/edit-address/<%= address._id %>" class="btn btn-primary edit-address-button">Edit Address</a>
-                                    </div>
+                                 
+                                    <a href="/edit-address/<%= address._id %>" class="btn edit-address-button">Edit Address</a>
+                                
                                 </div>
                             <% }) %>
-                            <a href="/add-new-address" class="btn btn-primary">Add New Address</a>
+                            <a href="/add-new-address" class="btn" style="background-color: #3F69AA; color: white;">Add New Address</a>
                         </div>  
                         <div class="shipping-address mt-4 d-none" id="shippingAddressContainer">
                             <h2>Shipping Address</h2>
@@ -61,11 +63,15 @@
                         <div class="checkout-content">
                             <h3>Products</h3>
                             <% products.forEach((product) => { %>
-                            <p><%= product.productName %><span>₹ <%= product.itemQuantity * product.price %></span></p>
+                            <p><%= product.productName %><span>
+                                <%= product.itemQuantity %> X <%= product.price %> &emsp; &emsp;
+                                ₹ <%= product.itemQuantity * product.price %></?span></p>
                             <% }) %>
+                            <p class="">Total MRP<span>₹ <%= cart.totalMRP %></span></p>
                             <p class="sub-total">Sub Total<span>₹ <%= cart.totalPrice %></span></p>
                             <p class="ship-cost">Shipping Cost<span>₹ 50</span></p>
-                            <p class="coupon-discount">Coupon Applied <span>₹ </span></p>
+                            <p class="coupon-discount">Coupon Applied <span>₹ <%= cart.discount %></span></p>
+                            <p>You Saved in this purchase <span>₹ <%= totalSave %></span></p>
                             <h4>Grand Total<span>₹ <%= grandTotal %> </span></h4>
                         </div>
                     </div>  
@@ -76,28 +82,21 @@
                                 <div class="custom-control custom-radio">
                                     <input type="radio" class="custom-control-input" id="payment-1" name="paymentMethod" value="Razorpay">
                                     <label class="custom-control-label" for="payment-1">Razorpay</label>
-                                </div>
-                                <div class="payment-content" id="payment-1-show">
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras tincidunt orci ac eros volutpat maximus lacinia quis diam.</p>
-                                </div>
+                                </div>                                
                             </div>
                             <div class="payment-method">
                                 <div class="custom-control custom-radio">
                                     <input type="radio" class="custom-control-input" id="payment-5" name="paymentMethod" value="Cash on Delivery">
                                     <label class="custom-control-label" for="payment-5">Cash on Delivery</label>
-                                </div>
-                    
+                                </div>                    
                             </div>
                         </div>
-                        <div class="coupons">
-                            <button id="view-coupons-btn" class="btn btn-primary">View Coupons</button>
-                        </div>
-                        <div class="coupon">
-                            <input type="text" placeholder="Coupon Code">
-                            <button>Apply Code</button>
-                        </div>
-                        <div class="checkout-btn">
+                        <div class="checkout-btn justify-content-between align-items-center">
                             <button type="submit" form="checkoutForm">Place Order</button>
+                            <div class="coupons">
+                                <!-- Button to trigger the modal -->
+                                <button id="view-coupons-btn" class="btn btn-primary">View Coupons</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -108,28 +107,32 @@
 <!-- Checkout End -->
 
 <!-- Modal HTML -->
-<div class="modal fade" id="couponsModal" tabindex="-1" aria-labelledby="couponsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="couponsModalLabel">Available Coupons</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" id="coupons-modal-content">
-                <div class="text-center">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="sr-only">Loading...</span>
+                <div class="modal fade" id="couponsModal" tabindex="-1" aria-labelledby="couponsModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="couponsModalLabel">Available Coupons</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body" id="coupons-modal-content">
+                                <div class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" id="apply-selected-coupon-btn">Apply Coupon</button>
+                                <button type="button" class="btn btn-danger" id="remove-coupon-btn">Remove Coupon</button>
+                                <input type="hidden" name="appliedCouponId" id="appliedCouponId">
+
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -143,29 +146,139 @@
     //    }
     //});
 
-
-    document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('view-coupons-btn').addEventListener('click', () => {
-            fetch('/coupons_list')
-                .then(response => response.json())
-                .then(coupons => {
-                    const couponList = coupons.map(coupon => `
-                        <div class="coupon-item">
-                            <h5>${coupon.code}</h5>
-                            <p>Max. Discount: ₹ ${coupon.maxDiscount}</p>
-                            <p>Description: ${coupon.description}</p>
-                            <p>Expiry Date: ${coupon.expiryDate}</p>
-                        </div>
-                    `).join('');
-                    document.getElementById('coupons-modal-content').innerHTML = couponList;
+    document.addEventListener('DOMContentLoaded', function() {
+    const viewCouponsBtn = document.getElementById('view-coupons-btn');
+    
+    viewCouponsBtn.addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent the default form submission behavior
+        
+        // Perform AJAX request to fetch coupons
+        $.ajax({
+            url: '/coupons-list',
+            type: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    $('#coupons-modal-content').html('');
+                    response.coupons.forEach(coupon => {
+                        const couponItem = `
+                            <div class="coupon-item">
+                                <input type="radio" class="coupon-checkbox" id="${coupon._id}" name="coupon" value="${coupon._id}">
+                                <label for="${coupon._id}">
+                                    <span class="coupon-code">${coupon.code}</span>
+                                    <span class="coupon-description">${coupon.description}</span>
+                                    <span class="coupon-expiry">Expires on: ${coupon.expiryDate}</span>
+                                </label>
+                            </div>
+                        `;
+                        $('#coupons-modal-content').append(couponItem);
+                    });
                     $('#couponsModal').modal('show');
-                })
-                .catch(error => {
-                    console.error('Error loading coupons:', error);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Response indicates failure. Please check server logs for details.',
+                    });
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error('Error:', errorThrown);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Unable to fetch coupons. Please try again later.',
                 });
+            }
         });
     });
+});
 
+//Ajax call to Apply Selected Coupon
+            $('#apply-selected-coupon-btn').click(function () {
+                const selectedCoupon = $('input[name="coupon"]:checked').val();
+                if (selectedCoupon) {
+                    $.ajax({
+                        url: '/checkout/apply-coupon',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ couponId: selectedCoupon }),
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Coupon Applied',
+                                    text: 'The coupon has been successfully applied!',
+                                }).then(() => {
+                                    location.reload(); 
+                                });
+                                $('#remove-coupon-btn').prop('disabled', false); // Enable remove coupon button
+                                $('#couponsModal').modal('hide');
+                                //updateCartSummary(response.updatedCart); // Call the function to update the cart summary
+                                $('#appliedCouponId').val(selectedCoupon); // Store the applied coupon ID
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Invalid Coupon',
+                                    text: response.message,
+                                });
+                            }
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            console.error('Error:', errorThrown);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Unable to apply coupon. Please try again later.',
+                            });
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'No Coupon Selected',
+                        text: 'Please select a coupon to apply.',
+                    });
+                }
+            });
+
+
+//Remove if Coupon is Applied
+            $('#remove-coupon-btn').click(function (){
+                $.ajax({
+                    url: '/checkout/remove-coupon',
+                    type: 'POST',
+                    contentType: 'application/json',
+
+                    success: function(response) {
+                        if(response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Coupon Removed',
+                                text: 'The coupon has been successfully removed!',
+                            }).then(() => {
+                                location.reload(); 
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.message,
+                            });
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.error('Error:', errorThrown);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Unable to remove coupon. Please try again later.',
+                        });
+                    }
+                })
+            })            
+            
+
+//Place Order
 document.getElementById('checkoutForm').addEventListener('submit', function(event) {
     event.preventDefault(); 
 
@@ -173,7 +286,87 @@ document.getElementById('checkoutForm').addEventListener('submit', function(even
     const data = Object.fromEntries(formData.entries());
     var paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
     var billingAddress = document.querySelector('input[name="billingAddress"]:checked').value;
-    console.log("BILLING ADDRESS: ", billingAddress);
+
+    if (paymentMethod === 'Razorpay') {
+        $.ajax({
+            url: $(this).attr('action'),
+            type: 'POST',
+            data: $(this).serialize(),
+            success: function (response) {
+                console.log("Response", response);
+                if (response.razorpayOrder) {
+                    var options = {
+                        "key": "rzp_test_cpYGxJpSjhUjpX",
+                        "amount": response.razorpayOrder.amount,
+                        "currency": "INR",
+                        "name": "BooksParadise",
+                        "description": "Test Transaction",
+                        "order_id": response.razorpayOrder.id,
+                        "handler": function (response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Payment successful!',
+                                text: 'Your order ID is ' + response.razorpay_order_id,
+                                confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '/profile';
+                                }
+                            });
+                        },
+                        "prefill": {
+                            "name": "Test User",
+                            "email": "test.user@example.com",
+                            "contact": "9999999999"
+                        },
+                        "theme": {
+                            "color": "#3399cc"
+                        }
+                    };
+                    var rzp1 = new Razorpay(options);
+                    rzp1.open();
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.error('Error:', errorThrown);
+            }
+        })
+    } else {
+
+        this.submit();
+    }
+
+});
+
+
+document.getElementById('placeOrderButton').addEventListener('click', function () { placeOrder(); });
+
+function placeOrder() {
+    // Simulate order processing with a timeout
+    setTimeout(function() {
+        var selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+        if (selectedPaymentMethod === 'Cash on Delivery') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Order Placed!',
+                text: 'Your order has been successfully placed and will be processed with Cash on Delivery.',
+                confirmButtonText: 'Okay'
+            });
+        }
+    }, 500); 
+}
+
+            
+
+/*
+//Place Order
+document.getElementById('checkoutForm').addEventListener('submit', function(event) {
+    event.preventDefault(); 
+
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+    var paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+    var billingAddress = document.querySelector('input[name="billingAddress"]:checked').value;
 
     fetch(this.action, {
         method: 'POST',
@@ -215,7 +408,7 @@ document.getElementById('checkoutForm').addEventListener('submit', function(even
     });
 });
     
-
+*/
                 
 </script>
 

@@ -44,6 +44,7 @@ const changeOrderStatus = async( req, res ) =>{
     try {
         const orderId = req.body.orderId;
         const status = req.body.status;
+        
             await Order.updateOne({ _id: orderId}, { status })
             res.redirect('/admin/orders')
     } catch (error) {
@@ -106,9 +107,12 @@ const getOrderDetails = async( req, res ) =>{
 }
 
 
+
+
+
 module.exports = {
     getOrderListPage,
     changeOrderStatus,
     cancelOrder,
-    getOrderDetails
+    getOrderDetails,
 }

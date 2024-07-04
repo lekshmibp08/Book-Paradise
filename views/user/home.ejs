@@ -46,14 +46,20 @@
                             <div class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">My Account</a>
                                 <div class="dropdown-menu">
-                                    <a href="#" class="dropdown-item">Login</a>
-                                    <a href="#" class="dropdown-item">Register</a>
+                                    <% if (user) { %>
+                                        <a href="/logout" class="dropdown-item">Logout</a>
+                                    <% } else { %>
+                                        <a href="/login" class="dropdown-item">Login</a>
+                                        <a href="/register" class="dropdown-item">Register</a>
+                                    <% } %>
                                 </div>
                             </div>
+                            <% if (user) { %>
                             <div class="cart">
-                                <i class="fa fa-cart-plus"></i>
-                                <span>(0)</span>
+                                <a href="/cart"><i class="fa fa-cart-plus"></i></a>                                
+                                <span>(<%= cart.items.length %>)</span>
                             </div>
+                            <% } %>
                         </div>
                     </div>
                 </div>

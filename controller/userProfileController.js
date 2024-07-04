@@ -2,6 +2,8 @@ const User = require("../models/userModel")
 const Address = require("../models/addressSchema")
 const Product = require("../models/productModel")
 const Order = require('../models/orderSchema')
+const Wallet = require('../models/walletSchema')
+const Transaction = require('../models/transactionSchema')
 const userController = require("../controller/userController")
 const { format } = require('date-fns');
 
@@ -19,13 +21,17 @@ const getUserProfile = async(req, res) => {
         const userAddress = await Address.find({ userId: user }).lean();
         const wishData = userData.wishlist
         //console.log(wishData);
-        const orderData = await Order.find({userId : user})//.populate('items.product');
+        const orderData = await Order.find({userId : user}).sort({ createdAt: -1 });
         console.log("OrderData", orderData);
+
+        const wallet = await Wallet.findOne({ userId : user });
+        const transactions = await Transaction.find({userId: user})
+        console.log('WALLET: ', wallet);
         if (!userData) {
             console.log("No user data");
             return res.redirect('/login'); 
         } else {
-            res.render('profile', { userData, userAddress, wishData, orderData, format });
+            res.render('profile', { userData, userAddress, wishData, orderData, format, wallet, transactions });
         }
 
     } catch (error) {
@@ -66,7 +72,7 @@ const AddAddress = async( req, res ) => {
         })
 
         await address.save();
-        res.redirect('/profile')
+        res.redirect('/profile?tab=address')
     } catch (error) {
         console.log(error.message);
         res.status(500).send("Server Error");
@@ -109,7 +115,7 @@ const editAddress = async( req, res ) =>{
                 addressType: req.body.addressType
             }
         }, { new: true })
-        res.redirect('/profile')
+        res.redirect('/profile?tab=address')
 
     } catch (error) {
         console.log(error.message);
@@ -123,7 +129,7 @@ const deleteAddress = async (req, res) => {
         const id = req.params.id;
         console.log("Delete ID : ", id);
         await Address.findByIdAndDelete(id);
-        res.redirect('/profile');
+        res.redirect('/profile?tab=address');
     } catch (error) {
         console.log(error.message);
         res.status(400).render('error', { message: error.message });

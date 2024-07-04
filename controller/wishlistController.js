@@ -1,5 +1,6 @@
 const User = require("../models/userModel");
 const Product = require("../models/productModel");
+const Cart = require("../models/cartSchema");
 
 
 //Render Wishlist Page
@@ -29,7 +30,7 @@ const addToWishlist = async (req, res) => {
     
         const user = await User.findById(id);
         if (user) {
-            console.log("if user true");
+            console.log("user true");
             const alreadyAdded = user.wishlist.includes(productId);
             if (alreadyAdded) {
 
@@ -77,8 +78,56 @@ const deleteFromWishlist = async( req, res ) =>{
     }
 }
 
+
+const addToCartFromWishlist = async( req, res ) =>{
+    try {
+        const productId = req.params.id;
+        const userId = req.session.user;
+        const user = await User.findById(userId);
+        const product = await Product.findById(productId)
+        const wishIndex = user.wishlist.indexOf(productId);
+
+        if(wishIndex > -1){
+            user.wishlist.splice(wishIndex, 1);
+            let cart = await Cart.findOne({userId: userId});
+            if( !cart ){
+                cart = new Cart({ userId: userId})
+            }
+
+            const cartIndex = cart.items.findIndex(item => 
+                item.product.toString() === product._id.toString())
+
+            if( cartIndex > -1 ){
+                cart.items[cartIndex].itemQuantity += 1;
+            } else {
+                cart.items.push({
+                    product: product._id,
+                    name: product.productName,
+                    MRP: product.regularPrice,
+                    price: product.salePrice,
+                    itemQuantity: 1
+                });
+            }
+            cart.totalPrice = cart.items.reduce((acc, item) => acc + (item.price * item.itemQuantity), 0);
+            cart.totalMRP = cart.items.reduce((acc, item) => acc + (item.MRP * item.itemQuantity), 0);
+            await cart.save();
+            await user.save();
+            res.json({ success: true, message: 'Product added to cart successfully' });
+        } else {
+            console.log('Product not found');
+            res.status(404).json({ success: false, message: 'Product not found in wishlist' });
+        }
+    } catch (error) {
+        console.log(error.message);
+        res.status(400).render('error', { message: error.message });
+    }
+}
+
+
+
 module.exports = { 
     addToWishlist,
     getWishlistPage,
-    deleteFromWishlist 
+    deleteFromWishlist,
+    addToCartFromWishlist 
 };

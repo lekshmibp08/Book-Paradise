@@ -1,6 +1,54 @@
 
 <%- include("../partials/header") %>
-        
+        <style>
+            .order-container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .order-container h2 {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+
+            .order-details {
+                list-style-type: none;
+                padding: 0;
+            }
+
+            .order-details li {
+                display: flex;
+                justify-content: space-between;
+                padding: 10px 0;
+                border-bottom: 1px solid #eee;
+            }
+
+            .order-details li:last-child {
+                border-bottom: none;
+            }
+            .back-button {
+                display: block;
+                width: 100%;
+                padding: 10px;
+                text-align: center;
+                background-color: #3F69AA;
+                color: #fff;
+                text-decoration: none;
+                border: none;
+                border-radius: 4px;
+                margin-top: 20px;
+            }
+
+            .back-button:hover {
+                background-color: #053d92;
+                color: white;
+            }
+
+        </style>
         
         <!-- Breadcrumb Start -->
         <div class="breadcrumb-wrap">
@@ -18,6 +66,31 @@
         <!-- Order Details Start -->
         <div class="cart-page">
             <div class="container">
+                <div class="order-container">
+                    <h2>Order Details</h2>
+                    <ul class="order-details">
+                        <li><span>Order ID</span><span><%= order.orderId %></span></li>
+                        <li><span>Total Amount</span><span>₹ <%= order.totalAmount %></span></li>
+                        <li><span>Coupon Applied</span><span>₹ <%= order.couponDiscout %></span></li>
+                        <li><span>Shipping Charge</span><span>₹ 50</span></li>
+                        <li><span>Payment Method</span><span><%= order.paymentMethod %></span></li>
+                        <li><span>Status</span><span><%= order.status %></span></li>
+                        <li><span>Created At</span><span><%= order.createdAt %></span></li>
+                    </ul>
+                </div>
+                <div class="order-container">
+                    <h3>Shipping Address</h3>
+                    <ul class="order-details">
+                        <li><span>Name</span><span><%= order.billingAddress.name %></span></li>
+                        <li><span>Address Line 1</span><span><%= order.billingAddress.addressLine %></span></li>
+                        <li><span>Locality</span><span><%= order.billingAddress.locality %></span></li>
+                        <li><span>City</span><span><%= order.billingAddress.city %></span></li>
+                        <li><span>State</span><span><%= order.billingAddress.state %></span></li>
+                        <li><span>PIN Code</span><span><%= order.billingAddress.pin %></span></li>
+                    </ul>
+
+                </div>
+
                 <div class="row">
                     <div class="col-md-12">
                         <div class="table-responsive">
@@ -47,14 +120,7 @@
 
                                             <td><%= item.quantity %> X <%= item.product.salePrice %></td>
                                             
-                                            <td><%= order.status %><br>
-                                                
-                                                <% if (order.status === 'Delivered') { %>
-                                                    <form action="/return-order/<%= item.product._id %>" method="GET" style="display:inline;">
-                                                        <button type="submit" style="background-color: orange; width:90px; color: white;">Return</button>
-                                                    </form>
-                                                <% } %>
-                                            </td>
+                                            <td><%= order.status %></td>
                                         
                                         </tr>
                                         <% }); %>
@@ -63,6 +129,7 @@
                         </div>
                     </div>
                 </div>
+                <a href="/profile?tab=orders" class="back-button">Back</a>
             </div>
         </div>
     

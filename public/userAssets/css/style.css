@@ -1122,6 +1122,11 @@ button.btn {
 /**********************************/
 /************ Cart CSS ************/
 /**********************************/
+.empty-cart {
+    text-align: center;
+    color: red;
+}
+
 .cart-page {
     position: relative;
     padding: 60px 0;
@@ -1353,6 +1358,11 @@ button.btn {
     color: #ffffff;
     background: #3F69AA;
     border: none;
+}
+.edit-address-button{
+    color: #ffffff;
+    background: #3F69AA;
+    margin-left: 50px;
 }
 
 
@@ -1801,3 +1811,145 @@ button.btn {
     padding-bottom: 10px;
 }
 
+
+/**********************************/
+/******** Wallet CSS *******/
+/**********************************/
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Arial', sans-serif;
+}
+
+.dashboard-menu {
+    margin-bottom: 30px;
+}
+
+.dashboard-menu li {
+     display: inline;
+     margin: 0 10px;
+ }
+
+.dashboard-menu li a {
+    padding: 10px 20px;
+    border-radius: 5px;
+    background-color: #3F69AA;
+    color: #fff;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.dashboard-menu li a:hover,
+.dashboard-menu li a.active {
+    background-color: #0056b3;
+}
+
+.dashboard-wrapper {
+    padding: 30px;
+    background-color: #ffffff;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+.wallet-summary {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.wallet-summary h2 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.wallet-summary .btn {
+    font-size: 1rem;
+    padding: 10px 20px;
+}
+
+.table-responsive {
+    margin-top: 20px;
+}
+
+.table thead {
+    background-color: #3F69AA;
+    color: #fff;
+}
+
+.table thead th {
+    font-weight: bold;
+}
+
+.table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.filter-form {
+    margin-bottom: 20px;
+}
+
+.filter-form h3 {
+    margin-bottom: 15px;
+}
+
+.filter-form label {
+    margin-right: 10px;
+}
+
+.filter-form .form-group {
+    margin-bottom: 10px;
+}
+
+.filter-form .btn {
+    background-color: #3F69AA;
+    color: #fff;
+}
+
+.filter-form .btn:hover {
+    background-color:#004494;
+    color: white;
+}
+
+.wallet-summary-hr {
+    border: 0;
+    height: 1px;
+    background-color: #333;
+    margin-top: 10px;
+}
+
+.filter-form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-bottom: 20px;
+}
+
+.form-inline {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    width: 100%;
+}
+
+.add-money-button {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #4977bf;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.add-money-button:hover {
+    background-color: #004494;
+    color: white;
+}
