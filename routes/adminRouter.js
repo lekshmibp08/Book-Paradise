@@ -10,6 +10,7 @@ const productController = require("../controller/productController")
 const couponController = require("../controller/couponController")
 const orderController = require("../controller/adminOrderController")
 const returnOrders = require('../controller/returnOrders')
+const reportController = require('../controller/reportController')
 
 const  {isAdmin} = require("../Athentication/auth")
 
@@ -65,6 +66,11 @@ router.get("/orders/orderDetails", isAdmin, orderController.getOrderDetails)
 router.get("/return-orders", isAdmin, returnOrders.getReturnOrders)
 router.get("/return-orders/:id", isAdmin, returnOrders.viewReturnOrderDetails)
 router.post("/return-orders/:id/status", isAdmin, returnOrders.updateReturnOrderStatus)
+
+//Sales Reports
+router.get("/reports", isAdmin, reportController.getSalesReport)
+router.post("/reports/generate-report", isAdmin, reportController.generateReport)
+router.get("/reports/generate-excel-report", isAdmin, reportController.generateExcelReport)
 
 
 module.exports = router;

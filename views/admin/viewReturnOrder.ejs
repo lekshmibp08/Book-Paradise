@@ -53,6 +53,7 @@
                         <option value="Approved" <%= returnOrder.status === 'Approved' ? 'selected' : '' %>>Approved</option>
                         <option value="Rejected" <%= returnOrder.status === 'Rejected' ? 'selected' : '' %>>Rejected</option>
                         <option value="Canceled" <%= returnOrder.status === 'Canceled' ? 'selected' : '' %>>Canceled</option>
+                        <option value="Returned" <%= returnOrder.status === 'Returned' ? 'selected' : '' %>>Returned</option>
                     </select>
                     <button type="submit" class="btn" id="update-btn">Update</button>
                 </form>

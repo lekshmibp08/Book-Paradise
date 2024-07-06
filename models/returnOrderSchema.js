@@ -19,7 +19,7 @@ const returnOrderSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['Requested', 'In Process', 'Approved', 'Rejected', 'Canceled'],
+        enum: ['Requested', 'In Process', 'Approved', 'Rejected', 'Canceled', 'Returned'],
         default: 'Requested'
     },
     createdAt: {

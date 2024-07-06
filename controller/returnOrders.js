@@ -59,10 +59,12 @@ const updateReturnOrderStatus = async( req, res ) => {
 
         if (status === 'Approved' || status === 'Rejected' || status === 'Canceled') {
             await Order.findByIdAndUpdate(updatedReturnOrder.orderId, {
-                status: status === 'Approved' ? 'Returned' : 'Delivered', 
+                status: status === 'Approved' ? 'Request Processed' : 'Delivered', 
                 returnStatus: status
             });
-        }
+        } //else if (status === 'Returned'){
+
+        //}
         res.json({ status: true, message: 'Status Updated Successfully..!' });
     } catch (error) {
         console.log(error.message);
