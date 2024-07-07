@@ -297,11 +297,11 @@
                     <div class="header-content d-flex justify-content-between align-items-center mb-3">
                         <h2 class="header-title">Sales Report</h2>
                         <div class="button-wrapper">
-                            <a href="#" class="report">
+                            <a href="#" class="report" data-report-type="pdf">
                                 <i class='bx bx-cloud-download'></i>
                                 <span>Generate Sale Report</span>
                             </a>
-                            <a href="/admin/reports/generateexcelreport" class="report">
+                            <a href="#" class="report" data-report-type="excel">
                                 <i class='bx bx-cloud-download'></i>
                                 <span>Generate Excel Report</span>
                             </a>
@@ -367,6 +367,7 @@
         <span class="close-button">&times;</span>
         <h2>Generate Sales Report</h2>
         <form id="report-form" class="report-Form" action="/admin/reports/generate-report" method="post">
+            <input type="hidden" id="report-type" name="reportType" value="pdf">
             <label for="date-filter">Date Filter:</label>
             <select id="date-filter" name="datefilter" >
                 <option value="daily">Daily</option>
@@ -400,63 +401,67 @@
             topBar.classList.toggle('active');
             mainContent.classList.toggle('active');
         });
-
+    
         const modal = document.getElementById('reportModal');
-            const reportLink = document.querySelector('.report');
-        
-            reportLink.addEventListener('click', (e) => {
+        const reportLinks = document.querySelectorAll('.report');
+        const reportTypeInput = document.getElementById('report-type');
+    
+        reportLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
                 e.preventDefault();
-        
+                reportTypeInput.value = link.getAttribute('data-report-type');
                 modal.style.display = 'block';
             });
+        });
+    
         const dateFilterSelect = document.getElementById('date-filter');
-        
+    
         dateFilterSelect.addEventListener('change', (e) => {
             const selectedDateFilter = e.target.value;
-        
+    
             if (selectedDateFilter === 'custom') {
                 document.getElementById('custom-date-range').style.display = 'block';
             } else {
                 document.getElementById('custom-date-range').style.display = 'none';
             }
         });
+    
         const form = document.getElementById('report-form');
         const startDateInput = document.getElementById('start-date');
         const endDateInput = document.getElementById('end-date');
-        
+    
         form.addEventListener('submit', (e) => {
-          e.preventDefault();
-        
-          if (dateFilterSelect.value === 'custom') {
-            if (!startDateInput.value) {
-              alert('Please select a start date');
-              return;
+            e.preventDefault();
+    
+            if (dateFilterSelect.value === 'custom') {
+                if (!startDateInput.value) {
+                    alert('Please select a start date');
+                    return;
+                }
+    
+                if (!endDateInput.value) {
+                    alert('Please select an end date');
+                    return;
+                }
+/*    
+                const startDate = new Date(startDateInput.value);
+                const endDate = new Date(endDateInput.value);
+                const today = new Date();
+    
+                if (startDate >= endDate) {
+                    alert('The start date must be less than the end date.');
+                    return;
+                }
+    
+                if (startDate >= today || endDate >= today) {
+                    alert('Ensure the selected date is not after today.');
+                    return;
+                }
+*/                
             }
-        
-            if (!endDateInput.value) {
-              alert('Please select an end date');
-              return;
-            }
-        /*
-            const startDate = new Date(startDateInput.value);
-            const endDate = new Date(endDateInput.value);
-        
-            const today = new Date();
-        
-            if (startDate >= endDate) {
-              alert('The start date must be less than the end date.');
-              return;
-            }
-        
-            if (startDate >= today || endDate >= today) {
-              alert('Ensure the selected date is not after today.');
-              return;
-            }*/
-          }
-        
-          form.submit();
-          modal.style.display = 'none';
-        
+    
+            form.submit();
+            modal.style.display = 'none';
         });
     </script>
 </body>

@@ -56,8 +56,12 @@
                             </div>
                             <% if (user) { %>
                             <div class="cart">
-                                <a href="/cart"><i class="fa fa-cart-plus"></i></a>                                
+                                <a href="/cart"><i class="fa fa-cart-plus"></i></a>
+                                <% if (cart) { %>                                
                                 <span>(<%= cart.items.length %>)</span>
+                                <% } else { %>
+                                <span>(0)</span>
+                                <% } %>
                             </div>
                             <% } %>
                         </div>

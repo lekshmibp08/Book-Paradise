@@ -768,6 +768,18 @@ button.btn {
     border-radius: 5px;
     z-index: 5; 
 }
+.filter-btn{
+    background-color: #3F69AA;
+    color: white;
+    border: none;
+    margin-right: 15px;
+    margin-bottom: 27px;
+    height: 35px;
+}
+.filter-btn:hover {
+    background-color: #35588d;
+    color: white;
+}
 
 
 

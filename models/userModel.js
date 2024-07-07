@@ -46,12 +46,17 @@ var userSchema = new mongoose.Schema({
     history: {
         type: Array
     },
-    referalCode: {
+    referralCode: {
         type: String,
+        unique: true
     },
     redeemed: {
         type: Boolean,
         default: false,
+    },
+    isUsedReferral: { 
+        type: Boolean, 
+        default: false 
     },
     redeemedUsers: [
         {

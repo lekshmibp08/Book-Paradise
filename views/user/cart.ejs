@@ -17,9 +17,10 @@
         <!-- Cart Start -->
         <div class="cart-page">
             <div class="container">
-                <% if (cart.items.length === 0) { %>
+                <% if (!cart || cart.items.length === 0) { %>
                     <h3 class="empty-cart">Your cart is empty.</h3>
-                    <p class="empty-cart">Add Products to cart to purchase</p>
+                    <a href="/product"><p class="empty-cart">Add Products to cart to purchase</p></a>
+                    
                 <% } else { %>
                 <div class="row">
                     <div class="col-md-12">

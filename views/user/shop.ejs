@@ -98,7 +98,12 @@
                                         <i class="fa fa-star"></i>
                                         <i class="fa fa-star"></i>
                                     </div>
-                                    <div class="price">₹ <%= products[i].salePrice %> <span>₹<%= products[i].regularPrice %></span></div>
+                                    <div class="price">
+                                        <% if (products[i].salePrice < products[i].regularPrice) { %>
+                                            <span>₹<%= products[i].regularPrice %></span>
+                                        <% } %>
+                                        ₹ <%= products[i].salePrice %>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -121,8 +126,8 @@
 
             <div class="col-md-3">
                 
-                <button onclick="applyFilters()">Apply Filters</button>
-                <button onclick="clearFilters()">Clear All Filters</button>
+                <button class="filter-btn" onclick="applyFilters()">Apply Filters</button>
+                <button class="filter-btn" onclick="clearFilters()">Clear All Filters</button>
 
                 <div class="sidebar-widget category">
                     <h2 class="title">Category</h2>
@@ -165,18 +170,7 @@
                     </ul>
                 </div>
 
-                <!--
-                <div class="sidebar-widget brands">
-                    <h2 class="title">Language</h2>
-                    <ul>
-                        <% languages.forEach((language) =>{ %>
-                        <li>
-                            <a href="#"><%= language %></a>
-                        </li>
-                        <% }) %>
-                    </ul>
-                </div>
-                -->
+                
             </div>
         </div>
     </div>
@@ -193,10 +187,10 @@ function toggleWishlist(productId) {
         type: 'POST',
         success: function(response) {
             console.log('Success response:', response);
-
+            if(response) {
             Swal.fire({
-                title: response.message,
-                text: 'Continue Shopping',
+                title: "Success",
+                text: response.message,
                 icon: 'success',
                 timer: 2000,
                 showConfirmButton: false
@@ -210,6 +204,7 @@ function toggleWishlist(productId) {
                     icon.style.color = 'white';
                 }
             }
+        }
         },
         error: function(error) {
             console.log('Error:', error);
@@ -217,7 +212,7 @@ function toggleWishlist(productId) {
             let errorMessage = 'Something went wrong!';
             let errorTitle = 'Error!';
 
-            if (error.status === 401) {  
+            if (error.status === 404) {  
                 errorTitle = 'User Not Found';
                 errorMessage = 'Please login to manage your Wishlist';
             } else if (error.responseJSON && error.responseJSON.message) {
@@ -228,7 +223,6 @@ function toggleWishlist(productId) {
                 title: errorTitle,
                 text: errorMessage,
                 icon: 'error',
-                timer: 3000,
                 showConfirmButton: true
             }).then(() =>{
                 window.location.href = '/login'

@@ -164,6 +164,7 @@
                         <!-- Other tabs content -->
                         
                         <div class="tab-pane fade" id="address-tab" role="tabpanel" aria-labelledby="address-nav">
+                            <% if(userAddress && userAddress.length > 0) { %>
                             <div>
                                 <a href="/add-new-address" class="add-address-button">+ Add New Address</a>
                             </div>
@@ -172,7 +173,7 @@
                                 <% userAddress.forEach(function(address) { %>
                                 <ul class="address-details">
                                     <li><span>Full Name</span><span><%= address.name %></span></li>
-                                    <li><span>Mobile Number</span><span><%= address.mobile %></span></li>
+                                    <li><span>Mobile Number</span><%= address.mobile %></li>
                                     <li><span>Address</span><span><%= address.addressLine %> <br> <%= address.locality %>, <%= address.city %>, <br> <%= address.state %>, <%= address.pin %></span></li>
                                     <li><span>Type</span><span><%= address.addressType %></span></li>
                                 </ul>
@@ -184,12 +185,24 @@
                                 </div>
                                 <% }); %>
                             </div>
+                            <% } else { %>
+                            <div>
+                                <a href="/add-new-address" class="add-address-button">+ Add New Address</a>
+                            </div>
+                            <h4>Saved Address</h4>
+                            <div class="address-container">
+                                <p>No address is added yet.</p>
+                            </div>
+                            <% } %>
                         </div>
                         <!-- Other tabs content -->
 
                         
                         <div class="tab-pane fade" id="orders-tab" role="tabpanel" aria-labelledby="orders-nav">
                             <div class="table-responsive">
+                                <% if(orderData.length === 0) { %>
+                                    <p>No order has been made yet.</p>
+                                <% } else { %>
                                 <table class="table table-bordered">
                                     <thead class="thead-dark">
                                         <tr>
@@ -241,6 +254,7 @@
                                         <% }); %>
                                     </tbody>
                                 </table>
+                                <% } %>                            
                             </div>
                         </div>
 
@@ -251,11 +265,11 @@
                                         <div class="col-md-12">
                                             <div class="dashboard-wrapper user-dashboard">
                                                 <div class="wallet-summary">
-                                                    <h2>Wallet Balance: ₹ <%= wallet.balance %> </h2>
+                                                    <h2>Wallet Balance: ₹ <%= wallet ? wallet.balance : 0 %> </h2>
                                                     <a href="/wallet/add-money" class="add-money-button">Add Money</a>
                                                 </div>
                                                 <hr class="wallet-summary-hr">
-                        
+                                                <% if(transactions.length != 0) { %>
                                                 <div class="filter-form">
                                                     <h3 class="sort-header">Sort Transactions</h3>
                                                     <form action="/wallet" method="get" class="form-inline">
@@ -298,6 +312,7 @@
                                                         </tbody>
                                                     </table>
                                                 </div>
+                                                <% } %>
                                             </div>
                                         </div>
                                     </div>
@@ -305,27 +320,7 @@
                             </section>
                             
                         </div>
-                        <div class="tab-pane fade" id="address-tab" role="tabpanel" aria-labelledby="address-nav">
-                            <h4>Address</h4>
-                            <div>
-                                <a href="/add-new-address" class="btn btn-info" style="position: absolute; left:650px; top:20px">+ Add New
-                                    Address</a>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h5>Payment Address</h5>
-                                    <p>123 Payment Street, Los Angeles, CA</p>
-                                    <p>Mobile: 012-345-6789</p>
-                                    <button>Edit Address</button>
-                                </div>
-                                <div class="col-md-6">
-                                    <h5>Shipping Address</h5>
-                                    <p>123 Shipping Street, Los Angeles, CA</p>
-                                    <p>Mobile: 012-345-6789</p>
-                                    <button>Edit Address</button>
-                                </div>
-                            </div>
-                        </div>
+                        
                         <div class="tab-pane fade" id="account-tab" role="tabpanel" aria-labelledby="account-nav">
                             <form action="/change-password/<%= userData._id %>" method="post" id="change-password-form">
                                 <h4>Change Password</h4>

@@ -4,6 +4,8 @@ const expressAsyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
 const Product = require("../models/productModel")
 const Category = require("../models/categoryModel")
+const Wallet = require('../models/walletSchema')
+const Transaction = require('../models/transactionSchema')
 const Cart = require('../models/cartSchema')
 const randomstring = require("randomstring");
 
@@ -95,6 +97,11 @@ function generateOTP() {
     const otp = Math.floor(100000 + Math.random() * 900000);
     return otp;
   }
+
+// Generate a unique referral code
+function generateReferralCode() {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+}  
 
 
 //Email Verification
@@ -212,23 +219,40 @@ const resendOTP = async (req, res) => {
 const verifyOTP = async (req, res) => {
     try {
         const { otp } = req.body
-        console.log('Received OTP:', otp);
-        console.log('Session OTP:', req.session.userOtp);
-        console.log(req.session.userData);
+        //console.log('Received OTP:', otp);
+        //console.log('Session OTP:', req.session.userOtp);
+        //console.log(req.session.userData);
         if ( otp == req.session.userOtp) {
+            const referralCode = generateReferralCode();
+            console.log(referralCode);
             const user = req.session.userData
             const passwordHash = await securePassword(user.password)
 
-            const saveUserData = new User({
+            const newUser = new User({
                 name : user.name,
                 email : user.email,
                 mobile : user.mobile,
-                password : passwordHash
+                password : passwordHash,
+                referralCode : referralCode
             })
 
-            await saveUserData.save()
+            await newUser.save()
+            console.log(newUser);
+
+            const newUserWallet = new Wallet({
+                userId: newUser._id,
+                balance: 0
+            });
+            console.log(newUserWallet);
+
+            //Validate Referral Code
+        
+
+
+
+
         //Save user's _id in the session for future use
-            req.session.user = saveUserData._id;
+            req.session.user = newUser._id;
             res.json({ status : true })
         } else {
             console.log("OTP not Matching");

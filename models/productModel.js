@@ -49,6 +49,10 @@ const productSchema = Mongoose.Schema({
         type : Number,
         default : 0
     },
+    categoryOffer : {
+        type : Number,
+        default : 0
+    },
     language : {
         type : String,
         required : true,

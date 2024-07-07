@@ -49,7 +49,7 @@ const addToWishlist = async (req, res) => {
             }
         } else {
             console.log("if user false");
-            res.status(404).json({ message: 'User not found'});            
+            res.status(404).json({ message: 'User not found. Please Login to access Wishlist...'});            
         }
         
     } catch (error) {

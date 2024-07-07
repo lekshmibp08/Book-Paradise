@@ -33,6 +33,7 @@ router.get("/category", isAdmin, categoryController.getCategoryInfo)
 router.post("/addCategory", isAdmin, uploadCategory.single('image'), categoryController.addCategory)
 router.post("/blockCategory", isAdmin, categoryController.blockCategory)
 router.post("/unBlockCategory", isAdmin, categoryController.unBlockCategory)
+router.post("/category/apply-offer", isAdmin, categoryController.applyCategoryOffer)
 
 
 //Product Management
@@ -44,6 +45,7 @@ router.post("/editProduct/:id", isAdmin, uploadProduct.array("productImage", 5),
 router.delete("/deleteProductImage/:productId/:imageName", isAdmin, productController.deleteImage)
 router.post("/blockProduct", isAdmin, productController.blockProduct)
 router.post("/unBlockProduct", isAdmin, productController.unblockProduct)
+router.post("/products/apply-offer", isAdmin, productController.applyProductOffer)
 
 
 //Coupon Management

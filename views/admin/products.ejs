@@ -122,6 +122,139 @@
             border-color: #e0a800;
             color: white;
         }
+        
+        #add-offer-btn {
+            background-color: #28a745;
+            border: none;
+            border-radius: 5px;
+            width: 140px;
+            height: 38px;
+            color: white;
+            margin-top: 10px;
+            font-size: 1rem;
+            font-weight: 400;            
+        }
+
+/****************************/
+/*******Pagination CSS*******/
+/****************************/
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            list-style: none;
+            padding: 0;
+        }
+
+        .pagination .page-item {
+            margin: 0 5px;
+        }
+
+        .pagination .page-link {
+            display: block;
+            padding: 10px 15px;
+            background-color: #6f42c1;
+            color: #fff;
+            border: 1px solid #6f42c1;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #4c2c86;
+            color: #fff;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #4c2c86;
+            border-color: #4c2c86;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            background-color: #e9ecef;
+            color: #6c757d;
+            border-color: #dee2e6;
+        }        
+        
+
+/****************************/
+/*********Model CSS**********/
+/****************************/
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            /* overflow: auto; */
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: #dad4c6;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .offer-Form {
+            width: 100%;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
+        }
+
+        .offer-Form label {
+            position: relative;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .offer-Form input[type="number"],
+        .offer-Form select {
+            position: relative;
+            width: 100%;
+            height: 60%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+        }
+
+        .offer-Form button[type="submit"] {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .offer-Form button[type="submit"]:hover {
+            background-color: #3e8e41;
+        }
+
     </style>
 </head>
 <body>
@@ -160,6 +293,7 @@
                 <div class="main-content" id="main-content">
                     <div class="d-flex justify-content-between align-items-center mb-3 header-content">
                         <h2>Products</h2>
+                        <button id="add-offer-btn">Add Offer</button>
                         <button class="btn btn-success add-product-btn">
                             <a href="/admin/addProducts" style="color: white; text-decoration: none;">
                                 + Add Product
@@ -175,7 +309,8 @@
                                 <th>Regular Price</th>
                                 <th>Selling Price</th>
                                 <th>No. of Pieces</th>
-                                <th>Offer Applied</th>
+                                <th>Product Offer</th>
+                                <th>Category Offer</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -185,10 +320,11 @@
                                 <td><img src="/uploads/product-images/<%= product.productImage.length > 0 ? product.productImage[0] : '/adminAssets/assets/images/defaultImage.png' %>" alt="<%= product.name %>" class="img-fluid" style="max-width: 50px;"></td>
                                 <td><%= product.productName %></td>
                                 <td><%= product.category %></td>
-                                <td>Rs.<%= product.regularPrice %></td>
-                                <td><%= product.salePrice %></td>
+                                <td>₹.<%= product.regularPrice %></td>
+                                <td>₹.<%= product.salePrice %></td>
                                 <td><%= product.quantity %></td>
-                                <td><%= product.productOffer %></td>
+                                <td><%= product.productOffer %> %</td>
+                                <td><%= product.categoryOffer %> %</td>
                                 <td class="action-icons">
                                     <div class="d-flex align-items-center">
                                         <a href="/admin/editProduct?id=<%= product._id %>"><i class="fas fa-edit"></i></a>
@@ -210,18 +346,54 @@
                     </table>
                     <nav>
                         <ul class="pagination">
-                            <li class="page-item"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <% if (currentPage > 1) { %>
+                                <li class="page-item"><a href="?page=<%= currentPage - 1 %>&limit=<%= limit %>" class="page-link">Previous</a></li>
+                            <% } %>
+                            <% for (let i = 1; i <= totalPages; i++) { %>
+                                <% if (i === currentPage) { %>
+                                    <li class="page-item active"><span class="page-link"><%= i %></span></li>
+                                <% } else { %>
+                                    <li class="page-item"><a href="?page=<%= i %>&limit=<%= limit %>" class="page-link"><%= i %></a></li>
+                                <% } %>
+                            <% } %>
+                            <% if (currentPage < totalPages) { %>
+                                <li class="page-item"><a href="?page=<%= currentPage + 1 %>&limit=<%= limit %>" class="page-link">Next</a></li>
+                            <% } %>
                         </ul>
                     </nav>
                 </div>
             </div>
         </div>
     </div>
+
+<!-- Modal -->
+<div id="offerModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Add Offer</h2>
+        <form id="offerForm" class="offer-Form">
+            <label for="offerPercentage">Offer Percentage:</label>
+            <input type="number" id="offerPercentage" name="offerPercentage" min="0" max="50" value="0" required>
+            <br>
+            <label for="categories">Select Product:</label>
+            <select id="offerProducts" name="products" multiple required>
+                <% products.forEach(product=> { %>
+                    <option value="<%= product._id %>">
+                        <%= product.productName %>
+                    </option>
+                    <% }); %>
+            </select>
+            <br>
+            <button type="submit">Apply Offer</button>
+        </form>
+    </div>
+</div>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
     <script>
         document.getElementById('toggle-btn').addEventListener('click', function() {
             var sidebar = document.getElementById('sidebar');
@@ -231,6 +403,60 @@
             topBar.classList.toggle('active');
             mainContent.classList.toggle('active');
         });
+
+
+        const addOfferButton = document.getElementById('add-offer-btn');
+        const modal = document.getElementById('offerModal');
+        const closeButton = document.getElementsByClassName('close-button')[0];
+        const offerForm = document.getElementById('offerForm');
+
+        addOfferButton.addEventListener('click', function () {
+            modal.style.display = 'block';
+        });
+
+        closeButton.addEventListener('click', function () {
+            modal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function (event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        offerForm.addEventListener('submit', function (event) {
+            console.log("offerForm called")
+            event.preventDefault();
+            const offerPercentage = document.getElementById('offerPercentage').value;
+            const selectedCategories = document.getElementById('offerProducts').selectedOptions;
+            const offerids = Array.from(selectedCategories).map(option => option.value);
+
+            // Send the offer details to the server using AJAX or form submission
+            // Example using AJAX:
+            fetch('/admin/products/apply-offer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ offerPercentage, offerids })
+            })
+                .then(response => response.json())
+                .then(async data => {
+                    await Swal.fire({
+                        title: 'Offer applied',
+                        text: 'offer applied successfully',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    });
+                    modal.style.display = 'none';
+                    window.location.href = '/admin/products';
+                })
+                .catch(error => {
+                    // Handle any errors
+                    console.error('Error:', error);
+                });
+        });
+
     </script>
 </body>
 </html>

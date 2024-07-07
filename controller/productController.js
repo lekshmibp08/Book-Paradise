@@ -60,8 +60,24 @@ const addProducts = async(req, res) => {
 //Render Product Page
 const getAllProducts = async (req, res) => {
     try {
-        const products = await Product.find();
-        res.render("products", { products })
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 6;
+        const skip = (page - 1 ) * limit;
+
+        const products = await Product.find({})
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+        const totalProducts = await Product.countDocuments({});
+        const totalPages = Math.ceil(totalProducts/limit);
+
+        res.render("products", { 
+            products,
+            currentPage: page,
+            totalPages,
+            limit 
+        })
     } catch (error) {
         console.log(error.message);
         res.status(400).render('error', { message: error.message });
@@ -182,6 +198,34 @@ const unblockProduct = async (req, res) => {
     }
 }
 
+//Apply Product Offer
+const applyProductOffer = async( req, res ) => {
+    try {
+
+        const { offerids, offerPercentage } = req.body;
+        const products = await Product.find({_id: {'$in': offerids } })
+
+        for(const product of products) {
+            const category = await Category.findOne({name: product.category})
+            let categoryOfferPercentage = category.categoryOffer;
+            let categoryOfferPrice = Math.ceil( product.regularPrice * (100 - categoryOfferPercentage) / 100 );
+            let productOfferPrice = Math.ceil( product.regularPrice * (100 - offerPercentage) / 100 ) ;
+            if (categoryOfferPrice < productOfferPrice) {
+                product.salePrice = categoryOfferPrice;
+            } else {
+                product.salePrice = productOfferPrice;                
+            }
+            product.productOffer = offerPercentage;
+            await product.save();
+        }
+        res.json({message:"offer applied successfully"})
+        
+    } catch (error) {
+        console.log(error.message);
+        res.status(400).render('error', { message: error.message });
+    }
+}
+
 
 module.exports = {
     getProductAddPage,
@@ -191,5 +235,6 @@ module.exports = {
     editProduct,
     deleteImage,
     blockProduct,
-    unblockProduct
+    unblockProduct,
+    applyProductOffer
 }

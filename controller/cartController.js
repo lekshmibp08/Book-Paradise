@@ -12,6 +12,10 @@ const getCartPage = async( req, res) =>{
         const userId = req.session.user
         const cart = await Cart.findOne({ userId }).populate('items.product').exec();
         console.log(cart);
+        if (!cart) {
+            res.render('cart', { cart: null, products: [], grandTotal: 0 });
+            return;
+        }
         const products = cart.items.map(item => ({
             ...item.product._doc,
             itemQuantity: item.itemQuantity,

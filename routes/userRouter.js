@@ -58,7 +58,7 @@ router.post("/change-password/:id", isLogged, userProfileController.changePasswo
 
 
 // Wishlist
-router.post("/add-to-wishlist", isLogged, wishlistController.addToWishlist)
+router.post("/add-to-wishlist", wishlistController.addToWishlist)
 router.get("/wishlist", isLogged, wishlistController.getWishlistPage)
 router.get("/deleteWishlist", isLogged, wishlistController.deleteFromWishlist)
 router.get("/wishlist/add-to-cart/:id", isLogged, wishlistController.addToCartFromWishlist)
