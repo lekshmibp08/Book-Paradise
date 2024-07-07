@@ -70,7 +70,7 @@
                 if (data.status) {
                     window.location.href = '/'; // Update with your home page URL
                 } else {
-                    alert('OTP not matching');
+                    window.location.href = '/signup?message=' + encodeURIComponent(data.message);
                 }
             } catch (error) {
                 console.error('Error:', error);

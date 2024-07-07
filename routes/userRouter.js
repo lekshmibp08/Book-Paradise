@@ -39,6 +39,7 @@ router.get("/productDetails", userController.getProductDetails)
 
 //Profile page route
 router.get("/profile", isLogged, userProfileController.getUserProfile)
+router.get("/profile/sort-transactions", isLogged, userProfileController.sortTransactions)
 
 //Add new Address page
 router.get("/add-new-address", isLogged, userProfileController.getAddAddress)

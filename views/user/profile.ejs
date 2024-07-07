@@ -160,6 +160,9 @@
                                 </ul>
                                 <a href="/edit-profile" class="edit-button">EDIT</a>
                             </div>
+                            <div class="profile-container">
+                                <h4>My Unique Referrence :  &emsp; &emsp;<%= userData.referralCode %></h4>
+                            </div>
                         </div>
                         <!-- Other tabs content -->
                         
@@ -271,21 +274,18 @@
                                                 <hr class="wallet-summary-hr">
                                                 <% if(transactions.length != 0) { %>
                                                 <div class="filter-form">
-                                                    <h3 class="sort-header">Sort Transactions</h3>
-                                                    <form action="/wallet" method="get" class="form-inline">
+                                                    <form action="/profile/sort-transactions" method="get" class="form-inline">
                                                         <div class="form-group sort-group">
                                                             <label for="sort" class="sort-label">Sort by:</label>
                                                             <select id="sort" name="sort" class="form-control">
                                                                 <option value="">Select</option>
-                                                                <option value="maxAmount">Maximum Price</option>
-                                                                <option value="minAmount">Minimum Price</option>
-                                                                <option value="oldDate">Old Date</option>
-                                                                <option value="newDate">New Date</option>
+                                                                <option value="dateDesc">Newest Date</option>
+                                                                <option value="dateAsc">Oldest Date</option>
+                                                                <option value="amountDesc">Highest Amount</option>
+                                                                <option value="amountAsc">Lowest Amount</option>
                                                             </select>
                                                         </div>
-                                                        <div class="form-group">
-                                                            <button type="submit" class="btn">Apply Sort</button>
-                                                        </div>
+                                                        <button type="submit" class="btn">Apply Sort</button>
                                                     </form>
                                                 </div>
                         
@@ -296,6 +296,7 @@
                                                             <tr>
                                                                 <th>Date</th>
                                                                 <th>Type</th>
+                                                                <th>Description</th>
                                                                 <th>Amount</th>
                                                                 <th>Status</th>
                                                             </tr>
@@ -305,6 +306,7 @@
                                                                 <tr>
                                                                     <td><%= new Date(transaction.createdAt).toLocaleDateString() %> </td>
                                                                     <td><%= transaction.type %></td>
+                                                                    <td><%= transaction.description %></td>
                                                                     <td>₹ <%= transaction.amount %></td>
                                                                     <td><%= transaction.status %></td>
                                                                 </tr>

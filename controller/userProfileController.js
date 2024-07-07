@@ -204,6 +204,46 @@ const changePassword = async( req, res ) =>{
 }
 
 
+const sortTransactions = async( req, res ) => {
+    try {
+        const user = req.session.user;
+        if (!user) {
+            return res.redirect('/login');
+        }
+
+        const sortBy = req.query.sort; // Get sort criteria from query parameter
+        let sortOptions = {};
+
+        // Set sorting options based on sortBy value
+        switch (sortBy) {
+            case 'dateDesc':
+                sortOptions = { createdAt: -1 };
+                break;
+            case 'dateAsc':
+                sortOptions = { createdAt: 1 };
+                break;
+            case 'amountDesc':
+                sortOptions = { amount: -1 };
+                break;
+            case 'amountAsc':
+                sortOptions = { amount: 1 };
+                break;
+            default:
+                sortOptions = { createdAt: -1 }; // Default sort by newest date
+                break;
+        }
+
+        const transactions = await Transaction.find({ userId: user }).sort(sortOptions);
+
+        res.render('profile', { activeTab: 'wallet', transactions });
+
+    } catch (error) {
+        console.log(error.message);
+        res.status(400).render('error', { message: error.message });
+    }
+}
+
+
 
 module.exports = {
     getUserProfile,
@@ -214,5 +254,6 @@ module.exports = {
     getEditAddress,
     editAddress,
     deleteAddress,
-    changePassword 
+    changePassword,
+    sortTransactions 
 }

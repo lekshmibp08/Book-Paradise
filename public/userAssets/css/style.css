@@ -1910,6 +1910,7 @@ body {
 
 .filter-form label {
     margin-right: 10px;
+    margin-bottom: 15px;
 }
 
 .filter-form .form-group {
@@ -1941,10 +1942,7 @@ body {
 }
 
 .form-inline {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    width: 100%;
+    align-items:normal;
 }
 
 .add-money-button {

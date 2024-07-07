@@ -62,7 +62,8 @@ const getHomePage = async(req, res) => {
 const getSignupPage = async (req, res) => {
     try {
         if (!req.session.user) {
-            res.render("signup")
+            const message = req.query.message || '';
+            res.render("signup", { message });
         } else {
             res.redirect("/")
         }
@@ -221,7 +222,7 @@ const verifyOTP = async (req, res) => {
         const { otp } = req.body
         //console.log('Received OTP:', otp);
         //console.log('Session OTP:', req.session.userOtp);
-        //console.log(req.session.userData);
+        console.log(req.session.userData);
         if ( otp == req.session.userOtp) {
             const referralCode = generateReferralCode();
             console.log(referralCode);
@@ -243,20 +244,71 @@ const verifyOTP = async (req, res) => {
                 userId: newUser._id,
                 balance: 0
             });
-            console.log(newUserWallet);
 
             //Validate Referral Code
-        
+            if ( user.referralCode ) {
 
+                const referringUser = await User.findOne({
+                    referralCode: user.referralCode
+                })
+                if (referringUser) {
+                    let referringUserWallet = await Wallet.findOne({
+                        userId: referringUser
+                    })
+                    
+                    if( !referringUserWallet) {
+                        referringUserWallet = new Wallet({
+                            userId: referringUser._id,
+                            balance: 0
+                        })
+                    }
+                    console.log("Reffering Wallet;", referringUserWallet);
+                    newUserWallet.balance += 50;
+                    referringUserWallet.balance += 250;
+                    
+                    await newUserWallet.save();
+                    await referringUserWallet.save();
+                    console.log("Reffering Wallet;", referringUserWallet);
 
+                    const newUserTransaction = new Transaction({
+                        userId: newUser._id,
+                        amount: 50,
+                        description: 'Referral bonus',
+                        type: 'credit'
+                    })
+
+                    const referringUserTransaction = new Transaction({
+                        userId: referringUser._id,
+                        amount: 250,
+                        description: 'Referral reward',
+                        type: 'credit'
+                    })
+
+                    newUser.isUsedReferral = true;
+                    referringUser.redeemedUsers.push(newUser._id);
+
+                    await newUser.save()
+                    await referringUser.save()
+                    await newUserTransaction.save();
+                    await referringUserTransaction.save();
+                    
+                } else {
+                    console.log('Invalid Referral Code');
+                    await User.findByIdAndDelete(newUser._id);
+                    return res.json({status: false, message: "Invalid Referral Code" });
+                }
+
+            } 
+                
+            await newUserWallet.save();
 
 
         //Save user's _id in the session for future use
             req.session.user = newUser._id;
-            res.json({ status : true })
+            return res.json({ status : true })
         } else {
             console.log("OTP not Matching");
-            res.json({ status : false })
+            res.json({ status : false, message: "OTP not Matching" })
         }
         
     } catch (error) {

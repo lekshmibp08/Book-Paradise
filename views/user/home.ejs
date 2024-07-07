@@ -47,10 +47,11 @@
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">My Account</a>
                                 <div class="dropdown-menu">
                                     <% if (user) { %>
+                                        <a href="/profile" class="dropdown-item">My Account</a>
                                         <a href="/logout" class="dropdown-item">Logout</a>
                                     <% } else { %>
                                         <a href="/login" class="dropdown-item">Login</a>
-                                        <a href="/register" class="dropdown-item">Register</a>
+                                        <a href="/signup" class="dropdown-item">Register</a>
                                     <% } %>
                                 </div>
                             </div>
