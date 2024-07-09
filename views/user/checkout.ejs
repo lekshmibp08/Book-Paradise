@@ -1,5 +1,9 @@
 <%- include("../partials/header") %>        
-
+<style>
+    .text-muted {
+        color: rgb(109, 16, 16) !important; /* Override the label color to red */
+    }
+    </style>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <!-- Breadcrumb Start -->
@@ -19,7 +23,7 @@
     <div class="container">
         <form id="checkoutForm" action="/placeOrder" method="POST">
             <div class="row">
-                    <div class="col-md-7">
+                    <div class="col-md-6">
                         <div class="billing-address">
                             <h2>Choose Your Billing Address</h2>
                             <% addresses.forEach(function(address) { %>
@@ -57,14 +61,14 @@
                         </div>
                     
                 </div>
-                <div class="col-md-5">
+                <div class="col-md-6">
                     <div class="checkout-summary">
                         <h2>Cart Total</h2>
                         <div class="checkout-content">
                             <h3>Products</h3>
                             <% products.forEach((product) => { %>
                             <p><%= product.productName %><span>
-                                <%= product.itemQuantity %> X <%= product.price %> &emsp; &emsp;
+                                <%= product.itemQuantity %> X <s><%= product.regularPrice %></s> <%= product.price %> &emsp; &emsp; &emsp;
                                 ₹ <%= product.itemQuantity * product.price %></?span></p>
                             <% }) %>
                             <p class="">Total MRP<span>₹ <%= cart.totalMRP %></span></p>
@@ -72,7 +76,7 @@
                             <p class="ship-cost">Shipping Cost<span>₹ 50</span></p>
                             <p class="coupon-discount">Coupon Applied <span>₹ <%= cart.discount %></span></p>
                             <p>You Saved in this purchase <span>₹ <%= totalSave %></span></p>
-                            <h4>Grand Total<span>₹ <%= grandTotal %> </span></h4>
+                            <h4>Grand Total<span id="grandTotal">₹ <%= grandTotal %> </span></h4>
                         </div>
                     </div>  
                     <div class="checkout-payment">
@@ -83,6 +87,12 @@
                                     <input type="radio" class="custom-control-input" id="payment-1" name="paymentMethod" value="Razorpay">
                                     <label class="custom-control-label" for="payment-1">Razorpay</label>
                                 </div>                                
+                            </div>
+                            <div class="payment-method">
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input" id="payment-2" name="paymentMethod" value="Wallet">
+                                    <label class="custom-control-label" for="payment-2">Wallet</label>
+                                </div>                    
                             </div>
                             <div class="payment-method">
                                 <div class="custom-control custom-radio">
@@ -145,6 +155,21 @@
     //        shippingAddressContainer.classList.add('d-none');
     //    }
     //});
+    document.addEventListener('DOMContentLoaded', function () {
+        const grandTotalElement = document.getElementById('grandTotal');
+        const codRadioButton = document.getElementById('payment-5');
+
+        // Extract the grand total value from the text content and convert it to a number
+        const grandTotal = parseFloat(grandTotalElement.textContent.replace('₹', '').trim());
+
+        // Check if the grand total is greater than 600 and disable the COD option if true
+        if (grandTotal > 1000) {
+            codRadioButton.disabled = true;
+            const codLabel = document.querySelector('label[for="payment-5"]');
+            codLabel.classList.add('text-muted');
+            codLabel.textContent += ' (Unavailable for orders above ₹1000)';
+        }
+    });
 
     document.addEventListener('DOMContentLoaded', function() {
     const viewCouponsBtn = document.getElementById('view-coupons-btn');
@@ -279,21 +304,20 @@
             
 
 //Place Order
-document.getElementById('checkoutForm').addEventListener('submit', function(event) {
-    event.preventDefault(); 
+document.getElementById('checkoutForm').addEventListener('submit', function (event) {
+    event.preventDefault();
 
     const formData = new FormData(this);
     const data = Object.fromEntries(formData.entries());
-    var paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-    var billingAddress = document.querySelector('input[name="billingAddress"]:checked').value;
+   console.log(formData);
+   console.log("DATA:", data);
 
-    if (paymentMethod === 'Razorpay') {
-        $.ajax({
-            url: $(this).attr('action'),
-            type: 'POST',
-            data: $(this).serialize(),
-            success: function (response) {
-                console.log("Response", response);
+    $.ajax({
+        url: $(this).attr('action'),
+        type: 'POST',
+        data: data,
+        success: function (response) {
+            if (response.success) {
                 if (response.razorpayOrder) {
                     var options = {
                         "key": "rzp_test_cpYGxJpSjhUjpX",
@@ -303,6 +327,7 @@ document.getElementById('checkoutForm').addEventListener('submit', function(even
                         "description": "Test Transaction",
                         "order_id": response.razorpayOrder.id,
                         "handler": function (response) {
+                            console.log(response);
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Payment successful!',
@@ -310,7 +335,7 @@ document.getElementById('checkoutForm').addEventListener('submit', function(even
                                 confirmButtonText: 'OK'
                             }).then((result) => {
                                 if (result.isConfirmed) {
-                                    window.location.href = '/profile';
+                                    window.location.href = '/profile?tab=orders';
                                 }
                             });
                         },
@@ -325,36 +350,38 @@ document.getElementById('checkoutForm').addEventListener('submit', function(even
                     };
                     var rzp1 = new Razorpay(options);
                     rzp1.open();
+                } else {
+                    console.log("ELSE SUCCESS");
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Order Placed!',
+                        text: response.message,
+                        confirmButtonText: 'Okay'
+                    }).then(() => {
+                        window.location.href = '/profile?tab=orders';
+                    });
                 }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                console.error('Error:', errorThrown);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: response.message,
+                    confirmButtonText: 'Okay'
+                });
             }
-        })
-    } else {
-
-        this.submit();
-    }
-
-});
-
-
-document.getElementById('placeOrderButton').addEventListener('click', function () { placeOrder(); });
-
-function placeOrder() {
-    // Simulate order processing with a timeout
-    setTimeout(function() {
-        var selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-        if (selectedPaymentMethod === 'Cash on Delivery') {
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
             Swal.fire({
-                icon: 'success',
-                title: 'Order Placed!',
-                text: 'Your order has been successfully placed and will be processed with Cash on Delivery.',
+                icon: 'error',
+                title: 'Error!',
+                text: jqXHR.responseJSON.message || "An error occurred",
                 confirmButtonText: 'Okay'
             });
         }
-    }, 500); 
-}
+    });
+});
+
+
 
             
 

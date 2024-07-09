@@ -35,9 +35,9 @@
                 <ul>
                     <% returnOrder.orderId.items.forEach(function(item) { %>
                         <li>
-                            <strong>Product</strong>: <%= item.product.productName %><br>
-                            <img src="/uploads/product-images/item.product.productImage[0] %>" alt="<%= item.product.name %>" style="width: 80px; height: 110px;"><br>
-                            <strong>Quantity</strong>: <%= item.quantity %><br>
+                            <img src="/uploads/product-images/<%= item.product.productImage[0] %>" alt="<%= item.product.name %>" style="width: 80px; height: 110px;">
+                            <strong>Product</strong>: <%= item.product.productName %> &emsp; &emsp; &emsp;
+                            <strong>Quantity</strong>: <%= item.quantity %>&emsp; &emsp; &emsp;
                             <strong>Total</strong>: <%= item.total %>
                         </li>
                     <% }); %>

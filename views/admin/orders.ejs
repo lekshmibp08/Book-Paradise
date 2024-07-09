@@ -224,7 +224,7 @@
                                 <td>₹ <%= order.totalAmount %></td>
                                 <td><%= order.paymentMethod %></td>
                                 <td>
-                                    <form action="/admin/orders/status" method="POST">
+                                    <form action="/admin/orders/status" method="POST" id="status-form-<%= order._id %>">
                                         <div class="status-dropdown">
                                             <div class="status-overlay"></div>
                                             <select name="status" class="status-dropdown">
@@ -232,6 +232,8 @@
                                                 <option value="Processed" <%= order.status === 'Processed' ? 'selected' : '' %> class="status-processing">Processed</option>
                                                 <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %> class="status-shipped">Shipped</option>
                                                 <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %> class="status-delivered">Delivered</option>
+                                                <option value="Return Requested" <%= order.status === 'Return Requested' ? 'selected' : '' %> class="status-requested">Return Requested</option>
+                                                <option value="Request Processed" <%= order.status === 'Request Processed' ? 'selected' : '' %> class="status-request-processed">Request Processed</option>
                                                 <% if (order.status === 'Cancelled') { %>
                                                     <option value="Cancelled" selected class="status-cancelled">Cancelled</option>
                                                 <% } %>                                                
@@ -239,7 +241,7 @@
                                             </select>
                                         </div>
                                         <input type="hidden" name="orderId" value="<%= order._id %>">
-                                        <button class="update-btn" type="submit">
+                                        <button class="update-btn" type="submit" data-order-id="<%= order._id %>">
                                             <i class="fas fa-save"></i> Update
                                         </button>
                                     </form>
@@ -293,57 +295,74 @@
             });
         });
 
-//Sweet alert for Order Cancellation
-function cancelOrder(orderId) {
-    fetch(`/admin/orders/cancel?id=${orderId}`, { 
-        method: 'POST' 
-    })
-        .then(response => response.json())
-        .then(data => {
-            console.log(data.message);
-            if (data.message == "Order cancelled successfully") {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Order cancelled successfully',
-                }).then(() => {
-                    window.location.reload();
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: data.message,
-                });
+        document.querySelectorAll('.update-btn').forEach(button => {
+    button.addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent the button's default action
+
+        const orderId = this.getAttribute('data-order-id');
+        const form = document.getElementById(`status-form-${orderId}`);
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to change the order status?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, change it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit(); // Submit the form if the user confirms
             }
-        })
-        .catch(error => {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'An error occurred while removing the product',
-            });
-            console.error('Error:', error);
         });
-}
+    });
+});
 
-document.getElementById('update-button').addEventListener('click', function(event) {
-    event.preventDefault(); // Prevent the form from submitting immediately
-
+function cancelOrder(orderId) {
     Swal.fire({
         title: 'Are you sure?',
-        text: "Do you want to change the order status?",
+        text: "Do you want to cancel this order?",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, change it!'
+        confirmButtonText: 'Yes, cancel it!'
     }).then((result) => {
         if (result.isConfirmed) {
-            document.getElementById('status-form').submit(); // Submit the form if the user confirms
+            fetch(`/admin/orders/cancel?id=${orderId}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.message);
+                if (data.message === "Order cancelled successfully") {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Order cancelled successfully',
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message,
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while cancelling the order',
+                });
+                console.error('Error:', error);
+            });
         }
     });
-});
+}
+
 
 
     </script>

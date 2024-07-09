@@ -1,5 +1,7 @@
 const ReturnOrder = require('../models/returnOrderSchema')
 const Order = require('../models/orderSchema')
+const Wallet = require('../models/walletSchema')
+const Transaction = require('../models/transactionSchema')
 const { format } = require('date-fns')
 
 
@@ -9,6 +11,9 @@ const getReturnOrders = async( req, res ) =>{
             .populate('orderId')
             .populate('userId')
             .sort({ createdAt: -1})
+
+
+            console.log(returnOrders);
 
         res.render('returnOrders', { returnOrders, format })
     } catch (error) {
@@ -25,8 +30,7 @@ const viewReturnOrderDetails = async( req, res ) => {
         .populate({
             path: 'orderId',
             populate: {
-                path: 'items.product',
-                select: 'productImage'
+                path: 'items.product'
             }
         })
             .populate('userId')
@@ -62,9 +66,45 @@ const updateReturnOrderStatus = async( req, res ) => {
                 status: status === 'Approved' ? 'Request Processed' : 'Delivered', 
                 returnStatus: status
             });
-        } //else if (status === 'Returned'){
+        } else if (status === 'Returned'){                      //Refund for completed Return
 
-        //}
+            await Order.findByIdAndUpdate(updatedReturnOrder.orderId, {
+                status: status,
+                returnStatus: status
+            })
+
+            let returnOrder = await ReturnOrder.findById(returnOrderId)
+                .populate('userId')
+                .populate('orderId');
+            
+            let refundAmount = returnOrder.orderId.totalAmount - returnOrder.orderId.couponDiscout;
+            let description = `Refund, Order Id: ${returnOrder.orderId.orderId}` 
+
+            console.log(refundAmount);
+            const transaction = new Transaction({
+                userId: returnOrder.userId._id,
+                amount: refundAmount,
+                description: description,
+                type: 'credit',
+                status: 'completed'
+            })
+            await transaction.save();
+            console.log(transaction);
+
+            let wallet = await Wallet.findOne({userId: returnOrder.userId._id});
+            
+            if( !wallet ) {
+                wallet = new Wallet({
+                    userId: returnOrder.userId._id,
+                    balance: 0,
+                    transactions: []
+                })
+            }
+            wallet.balance += refundAmount;
+            wallet.transactions.push(transaction._id);
+            await wallet.save();
+            console.log(wallet);
+        }
         res.json({ status: true, message: 'Status Updated Successfully..!' });
     } catch (error) {
         console.log(error.message);

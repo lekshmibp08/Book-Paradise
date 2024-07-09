@@ -267,7 +267,7 @@ const applyCoupon = async( req, res ) =>{
             return res.status(400).json({ success: false, message: `Minimum Purchase Amound should be above ₹. ${coupon.minAmount}` });
         }
 
-        let couponDiscount = (cart.totalPrice * coupon.discount) / 100
+        let couponDiscount = Math.ceil((cart.totalPrice * coupon.discount) / 100); 
 
         if(couponDiscount > coupon.maxDiscount){
             console.log("MAX DISCOUNT");

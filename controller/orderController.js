@@ -56,9 +56,9 @@ const placeOrder = async( req, res ) =>{
             return res.status(400).json({ message: 'Cart is Empty' });
         }
         const { paymentMethod, billingAddress } = req.body;
-        console.log("BILLING ADDRESS: ", billingAddress);
-        console.log(paymentMethod);
+       
         if (!paymentMethod || !billingAddress) {
+            console.log('Payment method and billing address are required');
             return res.status(400).json({ message: 'Payment method and billing address are required' });
         }
         const orderItems = cartExist.items.map(item => ({
@@ -104,11 +104,42 @@ const placeOrder = async( req, res ) =>{
             razorpayInstance.orders.create(options, function(err, razorpayOrder) {
                 if (err) {
                     console.error(err);
-                    return res.status(500).json({ message: 'Razorpay order creation failed', error: err });
+                    console.log(razorpayOrder);
+                    return res.status(500).json({success: false, message: 'Razorpay order creation failed', error: err });
                 }
                 console.log("RAZORPAY SUCCESS")
                 res.json({ success: true, orderId: order._id, razorpayOrder });
             });
+        } else if(paymentMethod === "Wallet") {
+            console.log("Entered Wallet payment");
+            const wallet = await Wallet.findOne({ userId })
+            if(!wallet || wallet.balance < grandTotal){
+                console.log("Insufficient wallet balance");
+                return res.json({ success: false, message: 'Insufficient wallet balance'})
+            }
+            wallet.balance -= grandTotal;
+            console.log('ORDER ID:', order.orderId);
+            const transaction = new Transaction({
+                userId: userId,
+                amount: grandTotal,
+                description: `Wallet Payment for Order Id: ${order.orderId}`,
+                type: 'debit',
+                status: 'completed'
+            });
+
+            await transaction.save();
+            wallet.transactions.push(transaction._id);
+            await wallet.save();
+            await order.save();
+
+            cartExist.items = [];
+            cartExist.totalPrice = 0;
+            cartExist.totalMRP = 0;
+            cartExist.discount = 0;
+            cartExist.couponApplied = null;
+            await cartExist.save();
+
+            return res.json({ success: true, message: 'Order placed successfully', orderId: order.orderId });
         } else {
 
             await order.save();
@@ -122,7 +153,8 @@ const placeOrder = async( req, res ) =>{
                 { $addToSet: { usedBy: userId } });
 
             console.log("Order placed successfully");
-            return res.status(200).json({ message: "Order placed successfully" });
+            //return res.status(200).json({ message: "Order placed successfully" });
+            return res.json({ success: true, message: 'Order placed successfully', orderId: order.orderId });
         }
     } catch (error) {
         console.log(error.message);
@@ -167,7 +199,7 @@ const cancelOrder = async( req, res ) =>{
             await orderData.save();
 
     //Refund for Razorpay Payment
-            if(orderData.paymentMethod === "Razorpay"){
+            if(orderData.paymentMethod === "Razorpay" || orderData.paymentMethod === "Wallet"){
                 console.log("paymentMethod Working");
                 const user = orderData.userId
                 let wallet = await Wallet.findOne({ userId: user })
@@ -251,7 +283,8 @@ const processReturnOrder = async( req, res ) =>{
         });
         await returnOrder.save();
 
-        order.status = 'Request Processed';
+        order.status = 'Return Requested';
+        order.returnStatus = 'Requested';
         await order.save();
 
         res.redirect('/profile?tab=orders');

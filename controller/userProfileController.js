@@ -22,11 +22,14 @@ const getUserProfile = async(req, res) => {
         const wishData = userData.wishlist
         //console.log(wishData);
         const orderData = await Order.find({userId : user}).sort({ createdAt: -1 });
-        console.log("OrderData", orderData);
+        //console.log("OrderData", orderData);
 
+
+
+        
         const wallet = await Wallet.findOne({ userId : user });
-        const transactions = await Transaction.find({userId: user})
-        console.log('WALLET: ', wallet);
+        const transactions = await Transaction.find({userId: user}).sort({ createdAt: -1 })
+        //console.log('WALLET: ', wallet);
         if (!userData) {
             console.log("No user data");
             return res.redirect('/login'); 
