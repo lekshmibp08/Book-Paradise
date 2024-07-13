@@ -251,7 +251,7 @@ const applyCoupon = async( req, res ) =>{
         const user = await User.findById(userId);
         if( !user) {
             console.log("NO USER");
-            return res.status(401).json({ success: false, message: 'User not Found. Please Login...' });
+            return res.json({ success: false, message: 'User not Found. Please Login...' });
         }
         const couponUsed = await Coupon.findOne({
             _id : couponId,
@@ -259,12 +259,12 @@ const applyCoupon = async( req, res ) =>{
         })
         if( couponUsed ) {
             console.log("COUPON USED");
-            return res.status(401).json({ success: false, message: 'A User can use a Coupon only once.' });
+            return res.json({ success: false, message: 'A User can use a Coupon only once.' });
         }
         const cart = await Cart.findOne({userId : userId})
         if( cart.totalPrice < coupon.minAmount) {
             console.log("MINIMUM PURCHACE AMAOUNT");
-            return res.status(400).json({ success: false, message: `Minimum Purchase Amound should be above ₹. ${coupon.minAmount}` });
+            return res.json({ success: false, message: `Minimum Purchase Amound should be above ₹. ${coupon.minAmount}` });
         }
 
         let couponDiscount = Math.ceil((cart.totalPrice * coupon.discount) / 100); 

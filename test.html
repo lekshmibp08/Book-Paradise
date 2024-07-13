@@ -1,388 +1,163 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Listing</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+<%- include("../partials/header") %>
 
     <style>
         body {
-            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
         }
-        .sidebar {
-            height: 100vh;
-            background-color: #6f42c1;
-            padding-top: 20px;
-            color: white;
-            position: fixed;
-            left: 0;
-            width: 250px;
-            transition: left 0.3s;
-            z-index: 2;
-        }
-        .sidebar a {
-            color: white;
-            display: block;
-            padding: 10px;
-            text-decoration: none;
-            text-align: center;
-        }
-        .sidebar a:hover {
-            background-color: #5a36a3;
-        }
-        .top-bar {
-            background-color: #6f42c1;
-            color: white;
-            padding: 10px;
-            margin-left: 250px;
-            transition: margin-left 0.3s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .top-bar .search-bar {
-            margin-right: 20px;
-        }
-        .main-content {
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
             padding: 20px;
-            margin-left: 250px;
-            transition: margin-left 0.3s;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
         }
-        .table thead th {
-            background-color: #6f42c1;
-            color: white;
-        }
-        @media (max-width: 768px) {
-            .sidebar {
-                left: -250px;
-            }
-            .sidebar.active {
-                left: 0;
-            }
-            .top-bar {
-                margin-left: 0;
-            }
-            .top-bar.active {
-                margin-left: 250px;
-            }
-            .main-content {
-                margin-left: 0;
-            }
-            .main-content.active {
-                margin-left: 250px;
-            }
-        }
-        .toggle-btn {
-            display: none;
-        }
-        @media (max-width: 768px) {
-            .toggle-btn {
-                display: block;
-                cursor: pointer;
-                margin-right: 20px;
-            }
-            .search-bar,
-            .user-info {
-                flex: 1;
-            }
-            .search-bar input {
-                width: 100%;
-            }
-        }
-        .header-content {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .header-content .search-bar {
-            flex-grow: 1;
-            margin-right: 10px;
-        }
-        .header-content .add-product-btn {
-            margin-top: 10px;
-            flex-shrink: 0;
-        }
-        .table tbody td {
+
+        .header {
             text-align: center;
+            margin-bottom: 40px;
         }
 
-        /******Model CSS*******/
+        .header img {
+            width: 100px;
+            margin-bottom: 10px;
+        }
 
-        .modal {
-          display: none;
-          position: fixed;
-          z-index: 1;
-          left: 0;
-          top: 0;
-          width: 100%;
-          height: 100%;
-          /* overflow: auto; */
-          background-color: rgba(0, 0, 0, 0.4);
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #333;
         }
-        
-        .modal-content {
-            position: relative;
-          background-color:  #dad4c6;
-          margin: 15% auto;
-          padding: 20px;
-          border: 1px solid #888;
-          width: 40%;
+
+        .header p {
+            margin: 0;
+            color: #777;
         }
-        
-        .close-button {
-          color: #aaa;
-          float: right;
-          font-size: 28px;
-          font-weight: bold;
+
+        .section {
+            margin-bottom: 20px;
         }
-        
-        .close-button:hover,
-        .close-button:focus {
-          color: black;
-          text-decoration: none;
-          cursor: pointer;
+
+        .section h2 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            color: #333;
         }
-        
-        .report-Form {
-          width: 100%;
-          padding: 20px;
-          border: 1px solid #ccc;
-          border-radius: 5px;
-          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+        .section p {
+            margin: 0;
+            color: #777;
         }
-        
-        .report-Form label {
-            position: relative;
-          font-weight: bold;
-          margin-bottom: 5px;
+
+        .section table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
         }
-        
-        .report-Form input[type="number"],
-        .report-Form select {
-            position: relative;
-          width: 100%;
-          height: auto;
-          padding: 10px;
-          border: 1px solid #ccc;
-          margin-bottom: 20px;
+
+        .section table th,
+        .section table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
         }
-        
-        .report-Form button[type="submit"] {
-          background-color: #4CAF50;
-          color: #fff;
-          padding: 10px 20px;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
+
+        .section table th {
+            background-color: #f0f0f0;
+            font-weight: bold;
         }
-        
-        .report-Form button[type="submit"]:hover {
-          background-color: #3e8e41;
+
+        .total {
+            text-align: right;
+            margin-top: 20px;
         }
-        
+
+        .total h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #777;
+        }
+
+        .footer p {
+            margin: 0;
+        }
     </style>
-</head>
-<body>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="sidebar" id="sidebar">
-                <div class="text-center mb-4">
-                    <img src="/adminAssets/assets/images/main-logo.png" alt="Books Paradise" class="img-fluid">
-                </div>
-                <a href="/admin/dashboard">Dashboard</a>
-                <a href="/admin/products">Products</a>
-                <a href="/admin/users">Users</a>
-                <a href="/admin/Orders">Orders</a>
-                <a href="/admin/return-orders">Returned Orders</a>
-                <a href="/admin/coupons">Coupons</a>
-                <a href="/admin/category">Categories</a>
-                <a href="/admin/reports">Reports</a>
-                <a href="/admin/logout">Log Out</a>
-            </div>
-            <div class="col-md-12">
-                <div class="top-bar" id="top-bar">
-                    <div class="d-flex align-items-center">
-                        <span class="toggle-btn" id="toggle-btn"><i class="fas fa-bars fa-2x"></i></span>
-                        <div class="search-bar">
-                            <input type="text" class="form-control" placeholder="Search">
-                        </div>
-                        <div class="search-bar">
-                            <input type="text" class="form-control" placeholder="Search product name">
-                        </div>
-                    </div>
-                    <div class="user-info d-flex align-items-center">
-                        <span>Hi Admin</span>
-                        <i class="fas fa-user-circle fa-2x ml-3"></i>
-                    </div>
-                </div>
-                <div class="main-content" id="main-content">
-                    <div class="d-flex justify-content-between align-items-center mb-3 header-content">
-                        <h2>Sales Report</h2>
-                    </div>
-                    <div class="button-wrapper">
-                        <a href="#" class="report">
-                            <i class='bx bx-cloud-download'></i>
-                            <span>Generate Sale Report</span>
-                        </a>
-                        <a href="/admin/reports/generateexcelreport" class="report">
-                            <i class='bx bx-cloud-download'></i>
-                            <span>Generate Excel Report</span>
-                        </a>
-                    </div>
-                    <table class="table table-striped text-center"">
-                        <thead>
-                            <tr>
-                                <th>Order id</th>
-                                <th>Order date</th>
-                                <th>User name</th>
-                                <th>Total Price</th>
-                                <th>Discount</th>
-                                <th>Total Payed</th>
-                                <th>Payment Method</th>
-                                <th>Order status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% orders.forEach(order=> { %>                        
-                            <tr>
-                                <td><%= order.orderId %></td>
-                                <td><%= new Date(order.createdAt).toLocaleString() %></td>
-                                <td><%= order.userId.name %></td>
-                                <td><%= order.totalAmount %></td>
-                                <td><%= order.couponDiscout %></td>
-                                <td><%= order.totalAmount - order.couponDiscount + 50 %></td>
-                                <td><%= order.paymentMethod %></td>
-                                <td><%= order.status %></td>
-                            </tr>
-                            <% }); %>                        
-                    </table>
-                    <nav>
-                        <ul class="pagination">
-                        <% if (currentPage > 1) { %>
-                            <a href="?page=<%= currentPage - 1 %>&limit=<%= limit %>">Previous</a>
-                        <% } %>
-                            
-                        <% for (let i = 1; i <= totalPages; i++) { %>
-                            <% if (i === currentPage) { %>
-                                <span><%= i %></span>
-                            <% } else { %>
-                                <a href="?page=<%= i %>&limit=<%= limit %>"><%= i %></a>
-                            <% } %>
-                        <% } %>
-                            
-                        <% if (currentPage < totalPages) { %>
-                            <a href="?page=<%= currentPage + 1 %>&limit=<%= limit %>">Next</a>
-                        <% } %>
-                        </ul>
-                    </nav>
-                </div>
-            </div>
-        </div>
+
+
+<div class="container">
+    <div class="header">
+        <img src="logo.png" alt="Company Logo">
+        <h1>Company Name</h1>
+        <p>123 Main Street, City, State, ZIP</p>
+        <p>Phone: (123) 456-7890</p>
     </div>
 
-<!-- Modal -->
+    <div class="section">
+        <h2>Invoice To:</h2>
+        <p>John Doe</p>
+        <p>456 Elm Street, City, State, ZIP</p>
+        <p>Email: john.doe@example.com</p>
+        <p>Phone: (987) 654-3210</p>
+    </div>
 
-<div id="reportModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>Generate Sales Report</h2>
-        <form id="report-form" class="report-Form" action="/admin/reports/generate-report" method="post">
-            <label for="date-filter">Date Filter:</label>
-            <select id="date-filter" name="datefilter" >
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-                <option value="custom">Custom Date Range</option>
-            </select>
+    <div class="section">
+        <h2>Invoice Details:</h2>
+        <p>Invoice Number: 00123</p>
+        <p>Invoice Date: 2024-07-11</p>
+        <p>Due Date: 2024-07-25</p>
+    </div>
 
-            <!-- Custom Date Range Fields -->
-            <div id="custom-date-range" style="display: none;">
-                <label for="start-date">Start Date:</label>
-                <input type="date" id="start-date" name="startdate">
-                <label for="end-date">End Date:</label>
-                <input type="date" id="end-date" name="enddate">
-            </div>
+    <div class="section">
+        <h2>Items Purchased:</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Item</th>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Product 1</td>
+                <td>Lorem ipsum dolor sit amet</td>
+                <td>2</td>
+                <td>₹500.00</td>
+                <td>₹1000.00</td>
+            </tr>
+            <tr>
+                <td>Product 2</td>
+                <td>Consectetur adipiscing elit</td>
+                <td>1</td>
+                <td>₹750.00</td>
+                <td>₹750.00</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 
-            <button type="submit">Generate</button>
-        </form>
+    <div class="total">
+        <h3>Subtotal: ₹1750.00</h3>
+        <h3>Tax (10%): ₹175.00</h3>
+        <h3>Total: ₹1925.00</h3>
+    </div>
+
+    <div class="footer">
+        <p>Thank you for your business!</p>
+        <p>If you have any questions, feel free to contact us at support@example.com</p>
     </div>
 </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-        document.getElementById('toggle-btn').addEventListener('click', function() {
-            var sidebar = document.getElementById('sidebar');
-            var topBar = document.getElementById('top-bar');
-            var mainContent = document.getElementById('main-content');
-            sidebar.classList.toggle('active');
-            topBar.classList.toggle('active');
-            mainContent.classList.toggle('active');
-        });
+<%- include("../partials/header") %>
 
-        const modal = document.getElementById('reportModal');
-            const reportLink = document.querySelector('.report');
-        
-            reportLink.addEventListener('click', (e) => {
-                e.preventDefault();
-        
-                modal.style.display = 'block';
-            });
-        const dateFilterSelect = document.getElementById('date-filter');
-        
-        dateFilterSelect.addEventListener('change', (e) => {
-            const selectedDateFilter = e.target.value;
-        
-            if (selectedDateFilter === 'custom') {
-                document.getElementById('custom-date-range').style.display = 'block';
-            } else {
-                document.getElementById('custom-date-range').style.display = 'none';
-            }
-        });
-        const form = document.getElementById('report-form');
-        const startDateInput = document.getElementById('start-date');
-        const endDateInput = document.getElementById('end-date');
-        
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
-        
-          if (dateFilterSelect.value === 'custom') {
-            if (!startDateInput.value) {
-              alert('Please select a start date');
-              return;
-            }
-        
-            if (!endDateInput.value) {
-              alert('Please select an end date');
-              return;
-            }
-        
-            const startDate = new Date(startDateInput.value);
-            const endDate = new Date(endDateInput.value);
-        
-            const today = new Date();
-        
-            if (startDate >= endDate) {
-              alert('The start date must be less than the end date.');
-              return;
-            }
-        
-            if (startDate >= today || endDate >= today) {
-              alert('Ensure the selected date is not after today.');
-              return;
-            }
-          }
-        
-          form.submit();
-          modal.style.display = 'none';
-        
-        });
-    </script>
-</body>
-</html>

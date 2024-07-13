@@ -77,9 +77,16 @@ router.post("/checkout/remove-coupon", isLogged, cartController.removeCoupon)
 
 //Order
 router.post("/checkout", isLogged, orderController.getCheckoutPage)
-router.post("/placeOrder", isLogged, orderController.placeOrder)
+router.post("/create-razorpay-order", isLogged, orderController.createRazorpayOrder)
+router.post("/place-order", isLogged, orderController.placeOrder)
+router.get("/success", isLogged, orderController.getOrderSuccessPage)
 router.get("/view-order/:id", isLogged, orderController.getOrderDetails)
+router.post("/paynow-createOrder/:orderId", isLogged, orderController.createOrderForPayNow)
+router.post("/verifyPayment", isLogged, orderController.verifyPayNowPayment)
 router.post("/cancel-order", isLogged, orderController.cancelOrder)
+router.get("/order/:orderId/invoice", isLogged, orderController.getInvoice)
+router.get("/download-invoice/:orderId", isLogged, orderController.downloadInvoice )
+
 
 
 //Product Return Routes

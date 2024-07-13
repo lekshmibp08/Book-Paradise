@@ -101,6 +101,38 @@
         .action-icons i:hover {
             color: #6f42c1;
         }
+/****************************/
+/*******Breadcrumb CSS*******/
+/****************************/
+
+        .breadcrumb {
+            background-color: #f8f9fa; /* Light background color */
+            border-radius: 0.25rem; /* Rounded corners */
+            padding: 0.75rem 1rem; /* Padding inside the breadcrumb */
+            margin-bottom: 1rem; /* Space below the breadcrumb */
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: ">";
+            color: #6c757d; /* Dark gray color for the separator */
+            margin-right: 0.5rem;
+            margin-left: 0.5rem;
+        }
+
+        .breadcrumb a {
+            color: #007bff; /* Blue color for links */
+            text-decoration: none; /* No underline for links */
+        }
+
+        .breadcrumb a:hover {
+            color: #0056b3; /* Darker blue on hover */
+            text-decoration: underline; /* Underline on hover */
+        }
+
+        .breadcrumb-item.active {
+            color: #6c757d; /* Dark gray for active item */
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 left: -250px;
@@ -189,6 +221,12 @@
                     </div>
                 </div>
                 <div class="main-content" id="main-content">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Coupons</li>
+                        </ol>
+                    </nav>
                     <div class="header-content">
                         <h2>Coupon</h2>
                         <a href="/admin/addCoupon" class="btn btn-primary add-coupon-btn">+ Add Coupon</a>

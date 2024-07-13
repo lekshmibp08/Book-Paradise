@@ -176,8 +176,39 @@
             background-color: #e9ecef;
             color: #6c757d;
             border-color: #dee2e6;
-        }        
-        
+        }
+                
+/****************************/
+/*******Breadcrumb CSS*******/
+/****************************/
+
+        .breadcrumb {
+            background-color: #f8f9fa; /* Light background color */
+            border-radius: 0.25rem; /* Rounded corners */
+            padding: 0.75rem 1rem; /* Padding inside the breadcrumb */
+            margin-bottom: 1rem; /* Space below the breadcrumb */
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: ">";
+            color: #6c757d; /* Dark gray color for the separator */
+            margin-right: 0.5rem;
+            margin-left: 0.5rem;
+        }
+
+        .breadcrumb a {
+            color: #007bff; /* Blue color for links */
+            text-decoration: none; /* No underline for links */
+        }
+
+        .breadcrumb a:hover {
+            color: #0056b3; /* Darker blue on hover */
+            text-decoration: underline; /* Underline on hover */
+        }
+
+        .breadcrumb-item.active {
+            color: #6c757d; /* Dark gray for active item */
+        }
 
 /****************************/
 /*********Model CSS**********/
@@ -291,8 +322,14 @@
                     </div>
                 </div>
                 <div class="main-content" id="main-content">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Products</li>
+                        </ol>
+                    </nav>
                     <div class="d-flex justify-content-between align-items-center mb-3 header-content">
-                        <h2>Products</h2>
+                        <h2>Products</h2>                        
                         <button id="add-offer-btn">Add Offer</button>
                         <button class="btn btn-success add-product-btn">
                             <a href="/admin/addProducts" style="color: white; text-decoration: none;">

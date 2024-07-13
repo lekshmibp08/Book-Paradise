@@ -248,6 +248,8 @@ const sortTransactions = async( req, res ) => {
 
 
 
+
+
 module.exports = {
     getUserProfile,
     getAddAddress,
@@ -258,5 +260,5 @@ module.exports = {
     editAddress,
     deleteAddress,
     changePassword,
-    sortTransactions 
+    sortTransactions,
 }

@@ -9,6 +9,10 @@ const razorpay = require('razorpay');
 const ReturnOrder = require('../models/returnOrderSchema')
 const Wallet = require('../models/walletSchema')
 const Transaction = require('../models/transactionSchema')
+const pdf = require('html-pdf-node');
+const path = require('path');
+const ejs = require('ejs'); 
+const fs = require('fs')
 
 let razorpayInstance = new razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -41,26 +45,59 @@ const getCheckoutPage = async( req, res ) =>{
 }
 
 
+// Route to create Razorpay order
+const createRazorpayOrder = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        if (!userId) {
+            return res.status(401).json({ message: 'User not logged in' });
+        }
+
+        const cartExist = await Cart.findOne({ userId }).populate('items.product');    
+        if (!cartExist) {
+            return res.status(400).json({ message: 'Cart Not Found' });
+        }
+
+        const totalAmount = cartExist.items.reduce((sum, item) => sum + item.price * item.itemQuantity, 0);
+        const grandTotal = totalAmount - cartExist.discount + 50;
+
+        const options = {
+            amount: grandTotal * 100,
+            currency: 'INR',
+            receipt: Date.now().toString() + Math.floor(Math.random() * 1000)
+        };
+
+        razorpayInstance.orders.create(options, (err, razorpayOrder) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: 'Razorpay order creation failed', error: err });
+            }
+            res.json({ success: true, razorpayOrder });
+        });
+    } catch (error) {
+        console.log(error.message);
+        res.status(400).json({ message: error.message });
+    }
+};
+
+
 //Place Order Logic
 const placeOrder = async( req, res ) =>{
     try {
         const userId = req.session.user;
-        if( !userId ){
-            return res.status(401).json({ message: 'User not logged in' });
+        if (!userId) {
+            return res.s(401).json({ message: 'User not logged in' });
         }
         const cartExist = await Cart.findOne({ userId }).populate('items.product');    
-        if( !cartExist ){
+        if (!cartExist) {
             return res.status(400).json({ message: 'Cart Not Found' });
         }
-        if( cartExist.items.length === 0 ) {
-            return res.status(400).json({ message: 'Cart is Empty' });
-        }
-        const { paymentMethod, billingAddress } = req.body;
-       
+
+        const { paymentMethod, billingAddress, paymentStatus } = req.body;
         if (!paymentMethod || !billingAddress) {
-            console.log('Payment method and billing address are required');
             return res.status(400).json({ message: 'Payment method and billing address are required' });
         }
+
         const orderItems = cartExist.items.map(item => ({
             product: item.product._id,
             quantity: item.itemQuantity,
@@ -70,97 +107,72 @@ const placeOrder = async( req, res ) =>{
         const totalAmount = orderItems.reduce((sum, item) => sum + item.total, 0);
         const orderId = Date.now().toString() + Math.floor(Math.random() * 1000);
 
+        let finalPaymentStatus = 'Pending';
+        if (paymentMethod === 'Razorpay' && paymentStatus === 'Paid') {
+            finalPaymentStatus = 'Completed';
+        } else if (paymentMethod !== 'Razorpay') {
+            finalPaymentStatus = 'Completed';
+        }
+        console.log("WORKING JUST B4 ORDER CREATE");
         const order = new Order({
             orderId: orderId,
             userId: cartExist.userId,
             items: orderItems,
             totalAmount,
-            couponDiscout: cartExist.discount,
+            couponDiscount: cartExist.discount,
             billingAddress: billingAddress,
             shippingAddress: billingAddress,
             paymentMethod: paymentMethod,
             status: 'Pending',
+            paymentStatus: finalPaymentStatus, 
             returnStatus: 'Not Requested'
         });
-        const grandTotal = totalAmount - cartExist.discount + 50
 
-        if( paymentMethod === 'Razorpay') {
-            
-            await order.save();
-            cartExist.items = [];
-            cartExist.totalPrice = 0;
-            cartExist.totalMRP = 0;
-            cartExist.discount = 0;
-            cartExist.couponApplied = null;
-            await cartExist.save();
-            await Coupon.updateOne({ _id: cartExist.couponApplied }, 
-                { $addToSet: { usedBy: userId } });
-            
-                const options = {
-                amount: grandTotal * 100,
-                currency: 'INR',
-                receipt : String(order._Id)
-            };
-            razorpayInstance.orders.create(options, function(err, razorpayOrder) {
-                if (err) {
-                    console.error(err);
-                    console.log(razorpayOrder);
-                    return res.status(500).json({success: false, message: 'Razorpay order creation failed', error: err });
-                }
-                console.log("RAZORPAY SUCCESS")
-                res.json({ success: true, orderId: order._id, razorpayOrder });
-            });
-        } else if(paymentMethod === "Wallet") {
-            console.log("Entered Wallet payment");
-            const wallet = await Wallet.findOne({ userId })
-            if(!wallet || wallet.balance < grandTotal){
-                console.log("Insufficient wallet balance");
-                return res.json({ success: false, message: 'Insufficient wallet balance'})
-            }
-            wallet.balance -= grandTotal;
-            console.log('ORDER ID:', order.orderId);
-            const transaction = new Transaction({
+        await order.save();
+        console.log("WORKING JUST ORDER SAVED");
+        const grandTotal = order.totalAmount - order.couponDiscout + 50;
+        console.log(grandTotal);
+
+        if (paymentMethod === 'Wallet') {
+            console.log("if (paymentMethod = Wallet)");
+            let transaction = new Transaction({
                 userId: userId,
                 amount: grandTotal,
-                description: `Wallet Payment for Order Id: ${order.orderId}`,
-                type: 'debit',
+                description: "Wallet Payment for order",
+                type: "debit",
                 status: 'completed'
             });
-
-            await transaction.save();
-            wallet.transactions.push(transaction._id);
-            await wallet.save();
-            await order.save();
-
-            cartExist.items = [];
-            cartExist.totalPrice = 0;
-            cartExist.totalMRP = 0;
-            cartExist.discount = 0;
-            cartExist.couponApplied = null;
-            await cartExist.save();
-
-            return res.json({ success: true, message: 'Order placed successfully', orderId: order.orderId });
-        } else {
-
-            await order.save();
-            cartExist.items = [];
-            cartExist.totalPrice = 0;
-            cartExist.totalMRP = 0;
-            cartExist.discount = 0;
-            cartExist.couponApplied = null;
-            await cartExist.save();
-            await Coupon.updateOne({ _id: cartExist.couponApplied }, 
-                { $addToSet: { usedBy: userId } });
-
-            console.log("Order placed successfully");
-            //return res.status(200).json({ message: "Order placed successfully" });
-            return res.json({ success: true, message: 'Order placed successfully', orderId: order.orderId });
+            transaction.save();
+            console.log("Transaction saved");
         }
+
+        cartExist.items = [];
+        cartExist.totalPrice = 0;
+        cartExist.totalMRP = 0;
+        cartExist.discount = 0;
+        cartExist.couponApplied = null;
+        await cartExist.save();
+
+        if (cartExist.couponApplied) {
+            await Coupon.updateOne({ _id: cartExist.couponApplied }, { $addToSet: { usedBy: userId } });
+        }
+
+        res.json({ success: true, message: 'Order placed successfully', orderId: order.orderId });
     } catch (error) {
         console.log(error.message);
         res.status(400).render('error', { message: error.message }); 
     }
 
+}
+
+
+const getOrderSuccessPage = async( req, res ) => {
+    try {
+        res.render('success')
+    } catch (error) {
+        console.log(error.message);
+        res.status(400).render('error', { message: error.message });
+    }
 }
 
 
@@ -246,7 +258,7 @@ const cancelOrder = async( req, res ) =>{
     }
 }
 
-//Return products
+//Return all ordered products
 const getReturnOrderForm = async( req, res ) =>{
     try {
         const orderId = req.params.id;
@@ -315,13 +327,188 @@ const cancelReturnRequest = async( req, res ) =>{
 }
 
 
+const getInvoice = async( req, res ) => {
+    try {
+        const orderId = req.params.orderId;
+        const userId =  req.session.user;
+
+        const orderData = await Order.findById(orderId)
+            .populate('items.product')
+            .populate('billingAddress')
+            .exec();
+        const userData = await User.findById(userId)
+        console.log(orderData.billingAddress.name);
+
+        res.render('invoice', {orderData, userData})
+    } catch (error) {
+        console.log(error.message);
+        res.status(400).render('error', { message: error.message });
+    }
+}
+
+
+const downloadInvoice = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const orderId = req.params.orderId;
+
+        // Fetch order data and user data
+        const orderData = await Order.findById(orderId)
+            .populate('items.product')
+            .populate('billingAddress')
+            .exec();
+
+        const userData = await User.findById(userId); // Fetch user data
+
+        if (!orderData) {
+            return res.status(404).render('error', { message: 'Order Not Found..!' });
+        }
+
+        // Generate HTML content from template
+        const htmlContent = await generateHtml(orderData, userData);
+
+        // PDF options
+        const options = { format: 'A4' };
+
+        // Generate PDF from HTML
+        const pdfBuffer = await pdf.generatePdf({ content: htmlContent }, options);
+
+        // File path to save the PDF temporarily
+        const filePath = path.join(__dirname, 'invoice.pdf');
+
+        // Write the PDF buffer to a file
+        fs.writeFileSync(filePath, pdfBuffer);
+
+        // Send the generated PDF as download
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': 'attachment; filename="invoice.pdf"',
+        });
+        res.sendFile(filePath, {}, (err) => {
+            // Delete the file after sending
+            fs.unlinkSync(filePath);
+            if (err) {
+                console.log(err);
+                res.status(err.status).end();
+            } else {
+                console.log('File was sent successfully and deleted.');
+            }
+        });
+
+    } catch (error) {
+        console.log(error.message);
+        res.status(400).render('error', { message: error.message });
+    }
+};
+
+
+// Generate HTML from EJS template
+const generateHtml = async (orderData, userData) => {
+    return new Promise((resolve, reject) => {
+        
+        ejs.renderFile(path.join(__dirname, '../views/user/invoice.ejs'), { orderData: orderData, userData: userData}, (err, html) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(html);
+            }
+        });
+    });
+};
+
+
+//Pay After placing Order
+const createOrderForPayNow = async(req, res ) => {
+    const { orderId } = req.body;
+
+    try {
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        const totalAmount = order.totalAmount - order.couponDiscout + 50;
+
+        const amount = totalAmount * 100; 
+        const currency = 'INR';
+        const options = {
+            amount,
+            currency,
+            receipt: order.orderId,
+        };
+
+        await razorpayInstance.orders.create(options, (err, response) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: 'Razorpay order creation failed', error: err });
+            }
+            console.log("SUCCESS RESPONSE SEND");
+            res.json({
+                id: response.id,
+                currency: response.currency,
+                amount: response.amount
+            });
+        });
+
+        
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).render('error', { message: error.message });
+    }
+}
+
+
+//Verify Razorpay Payment for Pay Now
+const verifyPayNowPayment = async( req, res ) => {
+    try {
+        console.log("Entered VERIFICATION");
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
+        const order = await Order.findById(orderId);
+
+        const crypto = require('crypto');
+        const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
+        
+        hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
+        const generatedSignature = hmac.digest('hex');
+        console.log('GENERATTED SIG:', generatedSignature);
+        console.log('RAZORPAY SIG:', razorpay_signature);
+        
+        if (generatedSignature === razorpay_signature) {
+            console.log("ENTERED SUCCESS TRUE");
+            order.paymentMethod = 'Razorpay';
+            order.paymentStatus = 'Completed';
+            await order.save();
+            
+            res.json({ success: true, message: 'Payment successful' });
+
+        } else {
+            console.log("ENTERED SUCCESS FALSE");
+            res.json({ success: false, message: 'Payment failed' });
+        }
+    } catch (error) {
+        console.log(error.message);
+        res.status(400).render('error', { message: error.message });
+    }
+}
+
+
+
+
+
 
 module.exports = {
     getCheckoutPage,
     placeOrder,
+    getOrderSuccessPage,
     getOrderDetails,
     cancelOrder,
     getReturnOrderForm,
     processReturnOrder,
-    cancelReturnRequest 
+    cancelReturnRequest,
+    createRazorpayOrder,
+    getInvoice,
+    downloadInvoice,
+    createOrderForPayNow,
+    verifyPayNowPayment,
 }

@@ -50,6 +50,33 @@
             margin-left: 250px;
             transition: margin-left 0.3s;
         }
+        .breadcrumb {
+            background-color: #f8f9fa; 
+            border-radius: 0.25rem; /* Rounded corners */
+            padding: 0.75rem 1rem; /* Padding inside the breadcrumb */
+            margin-bottom: 1rem; /* Space below the breadcrumb */
+        }
+        
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: ">";
+            color: #6c757d; /* Dark gray color for the separator */
+            margin-right: 0.5rem;
+            margin-left: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: #007bff; /* Blue color for links */
+            text-decoration: none; /* No underline for links */
+        }
+        
+        .breadcrumb a:hover {
+            color: #0056b3; /* Darker blue on hover */
+            text-decoration: underline; /* Underline on hover */
+        }
+        
+        .breadcrumb-item.active {
+            color: #6c757d; /* Dark gray for active item */
+        }
         .card {
             background-color: #d1c4e9;
             color: black;
@@ -121,6 +148,31 @@
             flex-grow: 1;
             margin-right: 10px;
         }
+        .top-selling-head h3 {
+            margin-bottom: 20px;
+        }
+        .top-selling table {
+            width: 100%;
+        }
+        .top-selling th, .top-selling td {
+            padding: 10px;
+            text-align: left;
+        }
+        .top-selling th {
+            background-color: #6f42c1;
+            color: white;
+        }
+        .top-selling td {
+            background-color: #e1bee7;
+        }
+        .chartBtn {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin: 5px;
+        }
     </style>
 </head>
 <body>
@@ -155,53 +207,252 @@
                 </div>
                 <div class="main-content" id="main-content">
                     <h1>Dashboard</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                        </ol>
+                    </nav>
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="card">
                                 <h3>Total User</h3>
-                                <p></p>
                                 <i class="fas fa-users fa-3x"></i>
+                                <h3><%= statistics.newUsers %></h3>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="card">
                                 <h3>Total Order</h3>
-                                <p></p>
                                 <i class="fas fa-box fa-3x"></i>
+                                <h3><%= statistics.totalOrders %></h3>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="card">
                                 <h3>Total Sales</h3>
-                                <p></p>
-                                <i class="fas fa-chart-line fa-3x"></i>
+                                <i class="fas fa-rupee-sign fa-3x"></i>
+                                <h3>₹ <%= statistics.totalNetSale %></h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <h3>Total Coupon</h3>
+                                <i class="fas fa-tags fa-3x"></i>
+                                <h3>₹ <%= statistics.totalCouponDiscount %></h3>
                             </div>
                         </div>
                     </div>
-                    <div class="chart">
+                    <div class="chart mb-4">
                         <h2>Sales Details</h2>
-                        <canvas id="salesChart"></canvas>
+                        <div class="d-flex align-items-center mb-3">
+                            <button id="yearBtn" class="chartBtn">Show Yearly</button>
+                            <button id="monthBtn" class="chartBtn">Show Monthly</button>
+                            <button id="weekBtn" class="chartBtn">Show Weekly</button>
+                        </div>
+                        <canvas id="salesChart" width=auto height="100"></canvas>                        
                     </div>
-                    <button class="download-btn">Download Reports</button>
+                    <div class="row">
+                        <div class="col-lg-6 mb-4">
+                            <div class="top-selling">
+                                <div class="top-selling-head">
+                                    <h3>Top Categories</h3>
+                                </div>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align: center;">No.</th>
+                                            <th>Category Name</th>
+                                            <th style="text-align: center;">Total Sales</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% topCategory.forEach((category, index) => { %>
+                                        <tr>
+                                            <td style="text-align: center;"><%= index+1 %></td>
+                                            <td><%= category._id %></td>
+                                            <td style="text-align: center;"><%= category.totalSales %></td>
+                                        </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 mb-4">
+                            <div class="top-selling">
+                                <div class="top-selling-head">
+                                    <h3>Top Products</h3>
+                                </div>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align: center;">No.</th>
+                                            <th>Product Name</th>
+                                            <th style="text-align: center;">Total Sales</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% topProducts.forEach((product, index) =>{ %>
+                                        <tr>
+                                            <td style="text-align: center;"><%= index+1 %></td>
+                                            <td><%= product.productName %></td>
+                                            <td style="text-align: center;"><%= product.totalSales %></td>
+                                        </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <!-- End of top row -->
         </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!--
     <script>
-        document.getElementById('toggle-btn').addEventListener('click', function() {
-            var sidebar = document.getElementById('sidebar');
-            var topBar = document.getElementById('top-bar');
-            var mainContent = document.getElementById('main-content');
-            sidebar.classList.toggle('active');
-            topBar.classList.toggle('active');
-            mainContent.classList.toggle('active');
+        document.addEventListener("DOMContentLoaded", function () {
+
+            document.getElementById("toggle-btn").addEventListener("click", function () {
+                document.getElementById("sidebar").classList.toggle("active");
+                document.getElementById("top-bar").classList.toggle("active");
+                document.getElementById("main-content").classList.toggle("active");
+            });
         });
 
+        
     </script>
+    -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const orderData = JSON.parse('<%- JSON.stringify(orderData) %>');
+
+            let salesChart; // Reference to the current chart instance
+
+            function generateYearlyChartData(data) {
+                const labels = [];
+                const values = [];
+
+                Object.keys(data).forEach(year => {
+                    labels.push(year);
+                    let total = 0;
+                    Object.keys(data[year]).forEach(month => {
+                        Object.keys(data[year][month]).forEach(week => {
+                            total += data[year][month][week];
+                        });
+                    });
+                    values.push(total);
+                });
+
+                return {
+                    labels,
+                    values
+                };
+            }
+
+            function generateMonthlyChartData(data) {
+                const labels = Array.from({length: 12}, (_, i) => i + 1); // Labels 1 to 12 for months
+                const values = Array(12).fill(0);
+
+                Object.keys(data).forEach(year => {
+                    Object.keys(data[year]).forEach(month => {
+                        let total = 0;
+                        Object.keys(data[year][month]).forEach(week => {
+                            total += data[year][month][week];
+                        });
+                        values[month - 1] += total; // month is 1-based, array is 0-based
+                    });
+                });
+
+                return {
+                    labels,
+                    values
+                };
+            }
+
+            function generateWeeklyChartData(data) {
+                const labels = Array.from({length: 52}, (_, i) => i + 1); // Labels 1 to 52 for weeks
+                const values = Array(52).fill(0);
+
+                Object.keys(data).forEach(year => {
+                    Object.keys(data[year]).forEach(month => {
+                        Object.keys(data[year][month]).forEach(week => {
+                            values[week - 1] += data[year][month][week]; // week is 1-based, array is 0-based
+                        });
+                    });
+                });
+
+                return {
+                    labels,
+                    values
+                };
+            }
+
+            function renderChart(chartData, lineColor = 'rgba(75, 192, 192, 1)') {
+                if (salesChart) {
+                    salesChart.destroy(); // Destroy the existing chart instance
+                }
+                
+                const ctx = document.getElementById('salesChart').getContext('2d');
+                salesChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            label: 'Total Sales',
+                            data: chartData.values,
+                            borderColor: lineColor,
+                            borderWidth: 1,
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Time'
+                                }
+                            },
+                            y: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Sales Amount'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const yearlyData = generateYearlyChartData(orderData);
+            renderChart(yearlyData); // Default to yearly chart
+
+            document.getElementById('yearBtn').addEventListener('click', () => {
+                const yearData = generateYearlyChartData(orderData);
+                renderChart(yearData, 'rgba(255, 99, 132, 1)');
+            });
+
+            document.getElementById('monthBtn').addEventListener('click', () => {
+                const monthData = generateMonthlyChartData(orderData);
+                renderChart(monthData, 'rgba(54, 162, 235, 1)');
+            });
+
+            document.getElementById('weekBtn').addEventListener('click', () => {
+                const weekData = generateWeeklyChartData(orderData);
+                renderChart(weekData, 'rgba(75, 192, 192, 1)');
+            });
+        });
+    </script>
+
+    
 </body>
 </html>

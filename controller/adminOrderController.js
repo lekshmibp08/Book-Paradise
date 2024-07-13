@@ -10,26 +10,28 @@ const { format } = require('date-fns')
 //Render Order Page for Admin
 const getOrderListPage = async( req, res ) =>{
     try {
-        const PAGE_SIZE = 10; // Number of orders per page
-        const currentPage = parseInt(req.query.page) || 1;
-        const skip = (currentPage - 1) * PAGE_SIZE;
+        
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const skip = (page - 1) * limit;
 
         const orders = await Order.find({})
             .populate('items.product')
             .populate('userId')
             .sort({ createdAt: -1 })
             .skip(skip)
-            .limit(PAGE_SIZE)
+            .limit(limit)
             .lean();
 
         const totalOrders = await Order.countDocuments({});
-        const totalPages = Math.ceil(totalOrders / PAGE_SIZE);
+        const totalPages = Math.ceil(totalOrders / limit);
 
 
         res.render('orders', {
             orders,
             totalPages,
-            currentPage,
+            currentPage: page,
+            limit,
             format 
         })
 

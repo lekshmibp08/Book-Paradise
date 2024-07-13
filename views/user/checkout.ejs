@@ -3,6 +3,15 @@
     .text-muted {
         color: rgb(109, 16, 16) !important; /* Override the label color to red */
     }
+
+    .payment-error{
+        color: red; 
+        display: none; 
+        text-align: center; 
+        font-weight: bold;
+        font-size: 25px;
+        margin-bottom: 55px;
+    }
     </style>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -21,6 +30,8 @@
 <!-- Checkout Start -->
 <div class="checkout">
     <div class="container">
+        <div class="payment-error" id="payment-error"></div>   <!--Failed Payment Message-->
+
         <form id="checkoutForm" action="/placeOrder" method="POST">
             <div class="row">
                     <div class="col-md-6">
@@ -146,6 +157,8 @@
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <script>
     //document.getElementById('shipToDifferent').addEventListener('change', function() {
     //    const shippingAddressContainer = document.getElementById('shippingAddressContainer');
@@ -228,6 +241,7 @@
                         contentType: 'application/json',
                         data: JSON.stringify({ couponId: selectedCoupon }),
                         success: function (response) {
+                            console.log("RESPONSE:", response);
                             if (response.success) {
                                 Swal.fire({
                                     icon: 'success',
@@ -240,9 +254,9 @@
                                 $('#couponsModal').modal('hide');
                                 //updateCartSummary(response.updatedCart); // Call the function to update the cart summary
                                 $('#appliedCouponId').val(selectedCoupon); // Store the applied coupon ID
-                            } else {
+                            } else if (response.success === false) {
                                 Swal.fire({
-                                    icon: 'error',
+                                    icon: 'warning',
                                     title: 'Invalid Coupon',
                                     text: response.message,
                                 });
@@ -303,139 +317,124 @@
             })            
             
 
-//Place Order
-document.getElementById('checkoutForm').addEventListener('submit', function (event) {
+// Place Order
+document.getElementById('checkoutForm').addEventListener('submit', function(event) {
     event.preventDefault();
 
     const formData = new FormData(this);
     const data = Object.fromEntries(formData.entries());
-   console.log(formData);
-   console.log("DATA:", data);
-
-    $.ajax({
-        url: $(this).attr('action'),
-        type: 'POST',
-        data: data,
-        success: function (response) {
+    const paymentMethod = data.paymentMethod;
+    
+    console.log(paymentMethod);
+    if (paymentMethod === 'Razorpay') {
+        fetch('/create-razorpay-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(response => {
             if (response.success) {
-                if (response.razorpayOrder) {
-                    var options = {
-                        "key": "rzp_test_cpYGxJpSjhUjpX",
-                        "amount": response.razorpayOrder.amount,
-                        "currency": "INR",
-                        "name": "BooksParadise",
-                        "description": "Test Transaction",
-                        "order_id": response.razorpayOrder.id,
-                        "handler": function (response) {
-                            console.log(response);
+                var options = {
+                    "key": "rzp_test_cpYGxJpSjhUjpX",
+                    "amount": response.razorpayOrder.amount,
+                    "currency": "INR",
+                    "name": "Paradise Books",
+                    "description": "Test Transaction",
+                    "order_id": response.razorpayOrder.id,
+                    "handler": function (response) {
+                        fetch('/place-order', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ ...data, paymentStatus: 'Completed', razorpayPaymentId: response.razorpay_payment_id })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: 'Order placed successfully!',
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                }).then(() => {
+                                    window.location.href = '/success';
+                                });
+                            }
+                        });
+                    },
+                    "prefill": {
+                        "name": "Your Name",
+                        "email": "your.email@example.com",
+                        "contact": "9999999999"
+                    },
+                    "theme": {
+                        "color": "#F37254"
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            // Handle modal dismiss event (user closed without payment)
+                            console.log('Payment window closed without success');
                             Swal.fire({
-                                icon: 'success',
-                                title: 'Payment successful!',
-                                text: 'Your order ID is ' + response.razorpay_order_id,
+                                title: 'Payment Failed!',
+                                text: 'Payment failed. Try again or try after some time..!',
+                                icon: 'error',
                                 confirmButtonText: 'OK'
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    window.location.href = '/profile?tab=orders';
-                                }
-                            });
-                        },
-                        "prefill": {
-                            "name": "Test User",
-                            "email": "test.user@example.com",
-                            "contact": "9999999999"
-                        },
-                        "theme": {
-                            "color": "#3399cc"
+                            }).then(() => {
+                                showPaymentFailedMessage('!.. Payment failed and Order Not Placed  ..!');
+                            })
                         }
-                    };
-                    var rzp1 = new Razorpay(options);
-                    rzp1.open();
-                } else {
-                    console.log("ELSE SUCCESS");
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Order Placed!',
-                        text: response.message,
-                        confirmButtonText: 'Okay'
-                    }).then(() => {
-                        window.location.href = '/profile?tab=orders';
-                    });
-                }
+                    }
+                };
+                var rzp1 = new Razorpay(options);
+                rzp1.open();
             } else {
                 Swal.fire({
-                    icon: 'error',
                     title: 'Error!',
-                    text: response.message,
-                    confirmButtonText: 'Okay'
+                    text: 'Error creating Razorpay order',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
                 });
             }
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: jqXHR.responseJSON.message || "An error occurred",
-                confirmButtonText: 'Okay'
-            });
-        }
-    });
-});
-
-
-
-            
-
-/*
-//Place Order
-document.getElementById('checkoutForm').addEventListener('submit', function(event) {
-    event.preventDefault(); 
-
-    const formData = new FormData(this);
-    const data = Object.fromEntries(formData.entries());
-    var paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-    var billingAddress = document.querySelector('input[name="billingAddress"]:checked').value;
-
-    fetch(this.action, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(result => {
-        if (result.message === "Order placed successfully") {
-            Swal.fire({
-                title: 'Success!',
-                text: result.message,
-                icon: 'success',
-                confirmButtonText: 'OK'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = '/profile';
-                }
-            });
-        } else {
-            Swal.fire({
-                title: 'Error!',
-                text: result.message,
-                icon: 'error',
-                confirmButtonText: 'OK'
-            });
-        }
-    })
-    .catch(error => {
-        Swal.fire({
-            title: 'Error!',
-            text: 'Something went wrong!',
-            icon: 'error',
-            confirmButtonText: 'OK'
         });
-        console.error('Error placing order:', error);
-    });
+    } else {
+        fetch('/place-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Order placed successfully!',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = '/success';
+                });
+            }
+        });
+    }
 });
+
+// Function to show payment failed message above Pay Now button
+function showPaymentFailedMessage(message) {
+    console.log("ENTERED INTO FUNCTION");
+    const paymentErrorElement = document.getElementById('payment-error');
+    paymentErrorElement.innerText = message;
+    paymentErrorElement.style.display = 'block';
+    //window.scrollTo({ top: 0, behavior: 'smooth' });
+    paymentErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
     
-*/
+}
+
                 
 </script>
 

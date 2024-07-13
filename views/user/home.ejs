@@ -44,7 +44,11 @@
                     <div class="col-md-3">
                         <div class="user">
                             <div class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">My Account</a>
+                                <% if (user) { %>
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><%= user.name %></a>
+                                <% } else { %>
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">My Account</a>
+                                <% } %>
                                 <div class="dropdown-menu">
                                     <% if (user) { %>
                                         <a href="/profile" class="dropdown-item">My Account</a>

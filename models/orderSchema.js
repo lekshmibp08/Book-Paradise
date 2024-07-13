@@ -61,6 +61,11 @@ const orderSchema = new Schema({
     returnReason: {
         type: String
     },
+    paymentStatus: {
+        type: String,
+        enum: ['Pending', 'Completed'],
+        
+    },
     createdAt: {
         type: Date,
         default: Date.now
