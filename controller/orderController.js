@@ -13,6 +13,7 @@ const pdf = require('html-pdf-node');
 const path = require('path');
 const ejs = require('ejs'); 
 const fs = require('fs')
+const { log } = require('console')
 
 let razorpayInstance = new razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -58,6 +59,17 @@ const createRazorpayOrder = async (req, res) => {
             return res.status(400).json({ message: 'Cart Not Found' });
         }
 
+        const outOfStockItem = cartExist.items.find(item => item.product.quantity === 0);
+        console.log("OUT OF STOCK:",outOfStockItem);
+        if (outOfStockItem) {
+            console.log("CHECK IN FOR OUT OF STOCK");
+            return res.json({ 
+                success: false, 
+                message: `The product "${outOfStockItem.product.productName}" in your cart is out of stock` 
+            });
+        }
+
+
         const totalAmount = cartExist.items.reduce((sum, item) => sum + item.price * item.itemQuantity, 0);
         const grandTotal = totalAmount - cartExist.discount + 50;
 
@@ -98,6 +110,16 @@ const placeOrder = async( req, res ) =>{
             return res.status(400).json({ message: 'Payment method and billing address are required' });
         }
 
+        const outOfStockItem = cartExist.items.find(item => item.product.quantity === 0);
+        console.log("OUT OF STOCK:",outOfStockItem);
+        if (outOfStockItem) {
+            console.log("CHECK IN FOR OUT OF STOCK");
+            return res.json({ 
+                success: false, 
+                message: `The product "${outOfStockItem.product.productName}" in your cart is out of stock` 
+            });
+        }
+
         const orderItems = cartExist.items.map(item => ({
             product: item.product._id,
             quantity: item.itemQuantity,
@@ -127,13 +149,21 @@ const placeOrder = async( req, res ) =>{
             paymentStatus: finalPaymentStatus, 
             returnStatus: 'Not Requested'
         });
-
-        await order.save();
+        
         console.log("WORKING JUST ORDER SAVED");
         const grandTotal = order.totalAmount - order.couponDiscout + 50;
         console.log(grandTotal);
 
         if (paymentMethod === 'Wallet') {
+            let wallet = await Wallet.findOne({userId: userId})
+            console.log("WALLET FOUND:", wallet);
+            if(wallet.balance < grandTotal) {
+                return res.json({ 
+                    success: false, 
+                    message: "!!..Insufficient Balance in your Wallet..!!" 
+                });
+            }
+            wallet.balance -= grandTotal;
             console.log("if (paymentMethod = Wallet)");
             let transaction = new Transaction({
                 userId: userId,
@@ -142,8 +172,17 @@ const placeOrder = async( req, res ) =>{
                 type: "debit",
                 status: 'completed'
             });
-            transaction.save();
-            console.log("Transaction saved");
+            await transaction.save();
+            wallet.transactions.push(transaction._id);
+            await wallet.save();
+        }
+
+        await order.save();
+        
+        const items = order.items;
+        for( const item of items){
+            const { product, quantity } = item;
+            await Product.findByIdAndUpdate(product, { $inc: { quantity: -quantity } });
         }
 
         cartExist.items = [];

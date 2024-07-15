@@ -4,6 +4,8 @@ const User = require('../models/userModel')
 const Coupon = require('../models/couponSchema')
 const Address = require('../models/addressSchema')
 const Order = require('../models/orderSchema')
+const Wallet = require('../models/walletSchema')
+const Transaction = require('../models/transactionSchema')
 const { format } = require('date-fns')
 
 
@@ -73,11 +75,28 @@ const cancelOrder = async( req, res ) =>{
                 const { product, quantity } = item;
                 await Product.findByIdAndUpdate(product, { $inc: { quantity: quantity } });
             }
+            if(orderData.paymentMethod === 'Razorpay' || orderData.paymentMethod === 'Wallet') {
+                const wallet = await Wallet.findOne({userId: orderData.userId})
+                const refundAmount = orderData.totalAmount - orderData.couponDiscout;
+                wallet.balance += refundAmount;
+                const transaction = new Transaction({
+                    userId: orderData.userId,
+                    amount: refundAmount,
+                    description: 'Order Cancellation',
+                    type: 'credit',
+                    status: 'completed'
+                })
+                await transaction.save(); 
+
+                wallet.transactions.push(transaction._id);
+
+                await wallet.save(); 
+            }
+            
+            
             return res.status(200).json({ message: 'Order cancelled successfully' });
 
-        } else {
-            return res.status(400).json({ error: 'Order cannot be cancelled' });
-        }
+        } 
 
     } catch (error) {
         console.log('ERROR: ', error.message);

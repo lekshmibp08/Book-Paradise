@@ -272,26 +272,10 @@
                                                     <a href="/wallet/add-money" class="add-money-button">Add Money</a>
                                                 </div>
                                                 <hr class="wallet-summary-hr">
-                                                <!--
-                                                <% if(transactions.length != 0) { %>
-                                                <div class="filter-form">
-                                                    <form action="/profile/sort-transactions" method="get" class="form-inline">
-                                                        <div class="form-group sort-group">
-                                                            <label for="sort" class="sort-label">Sort by:</label>
-                                                            <select id="sort" name="sort" class="form-control">
-                                                                <option value="">Select</option>
-                                                                <option value="dateDesc">Newest Date</option>
-                                                                <option value="dateAsc">Oldest Date</option>
-                                                                <option value="amountDesc">Highest Amount</option>
-                                                                <option value="amountAsc">Lowest Amount</option>
-                                                            </select>
-                                                        </div>
-                                                        <button type="submit" class="btn">Apply Sort</button>
-                                                    </form>
-                                                </div>
-                                                -->
+                                                
                                                 <div class="table-responsive">
                                                     <h3>Transaction History</h3>
+                                                    <% if(transactions.length > 0) { %>
                                                     <table class="table">
                                                         <thead>
                                                             <tr>
@@ -314,8 +298,10 @@
                                                             <% }); %>
                                                         </tbody>
                                                     </table>
+                                                    <% } else { %>
+                                                    <p>No transactions made yet...</p>
+                                                    <% } %>
                                                 </div>
-                                                <% } %>
                                             </div>
                                         </div>
                                     </div>
@@ -485,4 +471,4 @@ function cancelOrder(orderId) {
 }
 </script>
 
-    <%- include("../partials/footer") %>
+<%- include("../partials/footer") %>

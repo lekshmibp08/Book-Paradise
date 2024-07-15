@@ -446,8 +446,39 @@ const resetPassword = expressAsyncHandler( async(req, res) => {
     res.redirect("/login")
 })
 
+//Google authentication - Additional Info Form
+const getAdditionalInfoPage = async( req, res ) => {
+    res.render('additionalinfo', {title: 'Additional Information'});
+}
 
-//Shopping page for user
+
+//Google Authentication - Getting additional information 
+const saveAdditionalInfo = async( req, res ) => {
+    try {
+        const {mobile, password, conformPassword} = req.body;
+        if(password !== conformPassword){
+            return res.redirect('/auth/google/additional-info', {error_msg: 'Password do not match'})
+        }
+        const user = await User.findById(req.session.user)
+        if(!user) {
+            return res.redirect('/auth/google/additional-info', {error_msg: 'User not found'})
+        }
+        const referralCode = generateReferralCode();
+        const passwordHash = securePassword(password);
+        user.password = passwordHash;
+        user.mobile = mobile;
+        user.referralCode = referralCode;
+        await user.save();
+
+        req.session.user = user._id;
+        res.redirect('/');
+    } catch (error) {
+        console.log(error.message);
+        res.status(400).render('error', { message: error.message });
+    }
+}
+
+
 //Shopping page for user
 const getShopPage = async (req, res) => {
     try {
@@ -583,7 +614,9 @@ module.exports = {
     resetPassword,
     getShopPage,
     getProductDetails,
-    securePassword    
+    securePassword,
+    getAdditionalInfoPage,
+    saveAdditionalInfo   
 };
 
 

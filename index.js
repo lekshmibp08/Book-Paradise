@@ -9,6 +9,7 @@ const methodOverride = require('method-override');
 
 
 const dbConnect = require("./config/dbConnect");
+const passport = require('./config/passport')
 const { notFound, errorHandler } = require("./middlewares/errorHandler");
 
 
@@ -23,6 +24,7 @@ app.use(nocache());
 app.use(methodOverride('_method'));
 
 
+
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -32,6 +34,9 @@ app.use(session({
         httpOnly: true
     }
 }))
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.set("view engine", "ejs")
 
@@ -46,7 +51,7 @@ app.use(express.static(path.join(__dirname, "public")))
 
 
 //For User Routes
-const userRoutes = require("./routes/UserRouter")
+const userRoutes = require("./routes/userRouter")
 app.use("/", userRoutes)
 
 //For Admin Routes

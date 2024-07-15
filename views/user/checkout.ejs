@@ -394,7 +394,7 @@ document.getElementById('checkoutForm').addEventListener('submit', function(even
             } else {
                 Swal.fire({
                     title: 'Error!',
-                    text: 'Error creating Razorpay order',
+                    text: response.message,
                     icon: 'error',
                     confirmButtonText: 'OK'
                 });
@@ -418,6 +418,13 @@ document.getElementById('checkoutForm').addEventListener('submit', function(even
                     confirmButtonText: 'OK'
                 }).then(() => {
                     window.location.href = '/success';
+                });
+            } else {
+                Swal.fire({
+                    title: 'ERROR',
+                    text: data.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
                 });
             }
         });

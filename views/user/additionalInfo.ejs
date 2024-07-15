@@ -65,9 +65,12 @@
     </style>
 </head>
 <body>
-    <h1>Enter Additional Info</h1>
-    <!-- Assuming error_msg is either an empty string or the actual error message -->
-    <p id="error-msg" style="color: red;"></p>
+    <h1><%= title %></h1>
+    <% if (locals.message && message.length> 0) { %>
+        <div id="alertMessage" class="alert alert-danger">
+            <%= message %>
+        </div>
+    <% } %>
     <form action="/auth/google/additional-info" method="post">
         <div>
             <label for="mobile">Mobile Number</label>
@@ -79,11 +82,44 @@
         </div>
         <div>
             <label for="password2">Confirm Password</label>
-            <input type="password" id="password2" name="password2" required>
+            <input type="password" id="password2" name="conformPassword" required>
         </div>
         <button type="submit">Submit</button>
     </form>
 
     
 </body>
+
+<script>
+    document.getElementById('additionalInfoForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        let valid = true;
+
+        const mobile = document.getElementById('mobile').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const password2 = document.getElementById('password2').value.trim();
+
+        const mobileError = document.getElementById('mobile-error');
+        const passwordError = document.getElementById('password-error');
+        const password2Error = document.getElementById('password2-error');
+
+        mobileError.textContent = '';
+        passwordError.textContent = '';
+        password2Error.textContent = '';
+
+        if (!/^\d{10}$/.test(mobile)) {
+            mobileError.textContent = 'Mobile number must be 10 digits.';
+            valid = false;
+        }
+
+        if (password !== password2) {
+            password2Error.textContent = 'Passwords do not match.';
+            valid = false;
+        }
+
+        if (valid) {
+            this.submit();
+        }
+    });
+</script>
 </html>

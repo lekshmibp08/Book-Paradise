@@ -12,7 +12,7 @@ const isLogged = (req, res, next)=>{
                 res.redirect("/login")
             }
         })
-        .catch(err => {
+        .catch(error => {
             console.log(error.message);
             res.redirect("/login");
         });

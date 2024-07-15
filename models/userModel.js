@@ -13,12 +13,16 @@ var userSchema = new mongoose.Schema({
     },
     mobile:{
         type:String,
-        required:true,
+        required:false,
         unique:true,
     },
     password:{
         type:String,
-        required:true,
+        required:false,
+    },
+    googleId: {
+        type:String,
+        required:false
     },
     isAdmin:{
         type : Boolean,
@@ -65,6 +69,8 @@ var userSchema = new mongoose.Schema({
             required: true,
         }
     ],
+},{
+    timestamps:true
 });
 
 //Export the model

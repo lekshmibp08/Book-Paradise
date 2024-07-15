@@ -2,6 +2,7 @@ const express = require("express")
 const router = express.Router()
 
 const { isLogged } = require("../Athentication/auth")
+const passport = require('../config/passport')
 
 const userController = require("../controller/userController")
 const userProfileController = require("../controller/userProfileController")
@@ -30,6 +31,24 @@ router.post("/forget", userController.forgetVerify)
 router.get("/reset-password", userController.getResetPassword)
 router.post("/reset-password", userController.resetPassword)
 
+
+//google authentication
+router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] })); 
+router.get('/auth/google/callback', 
+    passport.authenticate('google', { failureRedirect: '/login' }),
+    async (req, res) => {
+        if (!req.user.mobile || !req.user.password) {
+            //req.session.user = req.user;
+            return res.redirect('/auth/google/additional-info');
+        }
+        req.session.user = req.user._id;
+        res.redirect('/');
+    }
+);
+
+
+router.get('/auth/google/additional-info', userController.getAdditionalInfoPage); 
+router.post('/auth/google/additional-info', userController.saveAdditionalInfo); 
 
 
 

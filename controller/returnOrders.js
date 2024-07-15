@@ -1,5 +1,6 @@
 const ReturnOrder = require('../models/returnOrderSchema')
 const Order = require('../models/orderSchema')
+const Product = require('../models/productModel')
 const Wallet = require('../models/walletSchema')
 const Transaction = require('../models/transactionSchema')
 const { format } = require('date-fns')
@@ -68,10 +69,17 @@ const updateReturnOrderStatus = async( req, res ) => {
             });
         } else if (status === 'Returned'){                      //Refund for completed Return
 
-            await Order.findByIdAndUpdate(updatedReturnOrder.orderId, {
-                status: status,
-                returnStatus: status
-            })
+            const order = await Order.findById(updatedReturnOrder.orderId);
+            order.status= status;
+            order.returnStatus= status;
+            await order.save();
+
+            const items = order.items;
+            
+            for( const item of items){
+                const { product, quantity } = item;
+                await Product.findByIdAndUpdate(product, { $inc: { quantity: quantity } });
+            }
 
             let returnOrder = await ReturnOrder.findById(returnOrderId)
                 .populate('userId')
