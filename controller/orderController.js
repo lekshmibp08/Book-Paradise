@@ -141,7 +141,7 @@ const placeOrder = async( req, res ) =>{
             userId: cartExist.userId,
             items: orderItems,
             totalAmount,
-            couponDiscount: cartExist.discount,
+            couponDiscout: cartExist.discount,
             billingAddress: billingAddress,
             shippingAddress: billingAddress,
             paymentMethod: paymentMethod,
@@ -150,7 +150,8 @@ const placeOrder = async( req, res ) =>{
             returnStatus: 'Not Requested'
         });
         
-        console.log("WORKING JUST ORDER SAVED");
+        console.log(cartExist.discount);
+        console.log("WORKING JUST ORDER SAVED:", order);
         const grandTotal = order.totalAmount - order.couponDiscout + 50;
         console.log(grandTotal);
 

@@ -20,10 +20,6 @@
     <!-- Light-Theming: -->
     <link id="mainStyle" rel="stylesheet" href="/userAssets/assets-signUp/css/style.css">
 
-    <!-- Dark-Theming: -->
-    <!-- Uncomment the line below to use dark theming. Don't forget to comment the line above.-->
-    <!-- <link rel="stylesheet" href="assets/css/style_dark.css"> -->
-    <!-- this also works automatically by clicking the theme_button. -->
 </head>
 <body>
 
@@ -104,23 +100,38 @@
             
             // Check if mobile number is 10 digits
             if (mobileNum.length !== 10 || !/^\d{10}$/.test(mobileNum)) {
-                alert("Mobile number must be 10 digits.");
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Mobile number must be 10 digits.",
+                    confirmButtonText: "OK",
+                });
                 event.preventDefault();
                 return;
             }
             
             // Check if passwords match
             if (password !== confirmPassword) {
-                alert("Passwords do not match.");
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Passwords do not match.",
+                    confirmButtonText: "OK",
+                });
                 event.preventDefault();
                 return;
             }
-
+            
             // Check if all fields are filled
             let email = document.getElementById("email").value;
             let name = document.getElementById("name").value;
             if (!email || !name || !mobileNum || !password || !confirmPassword) {
-                alert("All fields must be filled.");
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "All fields must be filled.",
+                    confirmButtonText: "OK",
+                });
                 event.preventDefault();
                 return;
             }

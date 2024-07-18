@@ -39,8 +39,12 @@
                                 <tbody class="align-middle">
                                     <% products.forEach((product) => { %>
                                         <tr>
-                                            <td><a href="#"><img src="/uploads/product-images/<%= product.productImage[0] %>" alt="Image"></a></td>
-                                            <td><a href="#"><%= product.productName %></a></td>
+                                            <td><a href="/productDetails?id=<%= product.id %>">
+                                                <img src="/uploads/product-images/<%= product.productImage[0] %>" alt="Image"></a>
+                                            </td>
+                                            <td><a href="/productDetails?id=<%= product.id %>">
+                                                <%= product.productName %></a>
+                                            </td>
                                             <td id="stock-<%= product._id %>" hidden><%= product.quantity %></td>
                                             <td>₹ <span class="product-price"><%= product.price %></span></td>
                                             <td>
@@ -144,6 +148,8 @@
                         console.log(confirmed.isConfirmed);
                         if (confirmed.isConfirmed) {
                             deleteItem(productId);
+                        } else {
+                            document.querySelector(`input.quantity[data-product-id='${productId}']`).value = 1
                         }
                     });
                 }
@@ -158,12 +164,14 @@
                 const stock = parseInt(document.getElementById(`stock-${productId}`).textContent);
                 if (newQuantity > stock) {
                     Swal.fire('Out Of Stock', 'Product get Out Of Stock', 'error');
+                    document.querySelector(`input.quantity[data-product-id='${productId}']`).value -= 1
                 } else if (newQuantity < 6) { 
                     quantityInput.value = newQuantity;
                     updateQuantity(productId, newQuantity);
                     window.location.reload(true);
                 } else {
                     Swal.fire('User Limit', 'Limit Exceeded', 'error');
+                    document.querySelector(`input.quantity[data-product-id='${productId}']`).value = 5
                 }
             });
         });

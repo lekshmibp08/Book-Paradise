@@ -14,7 +14,7 @@ const categoryStorage = multer.diskStorage({
 // Product storage engine
 const productStorage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'public/uploads/product-images');
+        cb(null, 'public/uploads/product-images/');
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + path.extname(file.originalname));

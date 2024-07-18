@@ -20,10 +20,9 @@ const getProductAddPage = async (req, res) => {
 const addProducts = async(req, res) => {
     try {
         const products = req.body;
-        //console.log(req.files);
+        console.log(req.files);
         console.log(products.productName);        
         const productExists = await Product.findOne({ productName: products.productName})
-        console.log("image section tested");
         if(productExists){
             res.json({ status: "failed", message: "Product already exists" });
         } else{
@@ -115,6 +114,8 @@ const editProduct = async (req, res) => {
                 existingImages.push(file.filename);
             });
         }
+
+        console.log("NEW IMAGES:", existingImages);
 
         const updatedProduct = await Product.findByIdAndUpdate(id, {
             productName: data.productName,

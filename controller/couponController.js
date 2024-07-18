@@ -32,7 +32,7 @@ const getAddCoupon = async(req, res) =>{
 const addCoupon = async( req, res ) =>{
     try {
         const coupon = req.body;
-        const couponExists = await Coupon.findOne({ name: coupon.couponName})
+        const couponExists = await Coupon.findOne({ code: coupon.couponCode})
 
         if( !couponExists) {
             const newCoupon = new Coupon({
@@ -46,9 +46,10 @@ const addCoupon = async( req, res ) =>{
                 
             })
             await newCoupon.save();
-            res.redirect('/admin/coupons')
+            res.json({ status: 'success', message: 'Coupon added Successfully' });
+            //res.redirect('/admin/coupons')
         } else {
-            res.json('failed')
+            res.json({ status: 'failed', message: 'Coupon code already exists' });
         }
     } catch (error) {
         console.log(error.message);

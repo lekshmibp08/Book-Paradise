@@ -8,7 +8,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
     <link id="stylesheet" rel="stylesheet" href="/adminAssets/assets/css/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
-    
 </head>
 <body>
     <div class="container-fluid">
@@ -20,7 +19,7 @@
                 <a href="/admin/dashboard">Dashboard</a>
                 <a href="/admin/products">Products</a>
                 <a href="/admin/users">Users</a>
-                <a href="/admin/Orders">Orders</a>
+                <a href="/admin/orders">Orders</a>
                 <a href="/admin/return-orders">Returned Orders</a>
                 <a href="/admin/coupons">Coupons</a>
                 <a href="/admin/category">Categories</a>
@@ -97,9 +96,7 @@
                                     <input name="quantity" id="quantity" type="number" class="form-control" placeholder="Quantity">
                                     <div class="error-message" id="quantityError"></div>
 
-                                    
                                     <div class="product-form-bottom">
-
                                         <!-- input file for image upload but the button is display is set as none -->
                                         <input type="file" id="product-image-upload" name="productImage" accept="image/png, image/jpeg" multiple class="d-none">
                         
@@ -110,7 +107,6 @@
                         
                                         <!-- the product preview will generate based on what we select -->
                                         <div id="product-image-preview"></div>
-                        
                         
                                         <!-- the form submission and cancel buttons -->
                                         <div>
@@ -125,7 +121,7 @@
 
                     <div id="cropper-modal">
                         <div id="cropper-container">
-                            <img id="cropper-image">
+                            <img id="cropper-image" style="max-width: 100%;">
                             <div id="cropper-buttons">
                                 <button id="crop-cancel" class="btn btn-secondary">Cancel</button>
                                 <button id="crop-confirm" class="btn btn-primary">Crop</button>
@@ -152,7 +148,6 @@
             mainContent.classList.toggle('active');
         });
 
-        
         const productImageUpload = document.getElementById('product-image-upload');
         const productImagePreview = document.getElementById('product-image-preview');
         const cropperModal = document.getElementById('cropper-modal');
@@ -167,13 +162,23 @@
             productImagePreview.innerHTML = '';
             files = Array.from(productImageUpload.files);
             if (files.length > 4) {
-                alert("Maximum file count is 4");
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Maximum file count is 4",
+                    confirmButtonText: "OK",
+                });
                 productImageUpload.value = '';
                 files = [];
                 return;
             }
             if (files.length === 0) {
-                alert("Minimum file count is 1");
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Minimum file count is 1",
+                    confirmButtonText: "OK",
+                });
                 productImageUpload.value = '';
                 files = [];
                 return;
@@ -181,38 +186,21 @@
             files.forEach((file, index) => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const imgElement = document.createElement('img');
-                    imgElement.src = e.target.result;
-                    imgElement.classList.add('preview-img');
-
-                    const imageBox = document.createElement('div');
-                    imageBox.classList.add('product-image-box');
-                    imageBox.appendChild(imgElement);
-
-                    const deleteButton = document.createElement('button');
-                    deleteButton.textContent = 'Delete';
-                    deleteButton.classList.add('delete-button');
-                    deleteButton.addEventListener('click', () => {
-                        files.splice(index, 1);
-                        imageBox.remove();
-                    });
-                    imageBox.appendChild(deleteButton);
-
-                    productImagePreview.appendChild(imageBox);
-
-                    imgElement.addEventListener('click', () => {
-                        cropperImage.src = e.target.result;
-                        cropperModal.style.display = 'block';
-                        cropper = new Cropper(cropperImage, {
-                            aspectRatio: 1,
-                            viewMode: 1,
-                            movable: true,
-                            zoomable: true,
-                            rotatable: true,
-                            scalable: true,
-                        });
+                    const imageUrl = e.target.result;
+                    const imageElement = document.createElement('img');
+                    imageElement.src = imageUrl;
+                    imageElement.style.maxWidth = '200px';
+                    imageElement.style.cursor = 'pointer';
+                    imageElement.addEventListener('click', () => {
                         currentFileIndex = index;
+                        cropperImage.src = imageUrl;
+                        cropper = new Cropper(cropperImage, {
+                            viewMode: 1,
+                            autoCropArea: 1,
+                        });
+                        cropperModal.style.display = 'block';
                     });
+                    productImagePreview.appendChild(imageElement);
                 };
                 reader.readAsDataURL(file);
             });
@@ -228,136 +216,155 @@
             canvas.toBlob((blob) => {
                 const croppedFile = new File([blob], files[currentFileIndex].name, { type: 'image/jpeg' });
                 files[currentFileIndex] = croppedFile;
-
+                
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const imgElement = productImagePreview.children[currentFileIndex].querySelector('.preview-img');
-                    imgElement.src = e.target.result;
+                    const imageUrl = e.target.result;
+                    const imageElement = productImagePreview.children[currentFileIndex];
+                    imageElement.src = imageUrl;
+                    cropperModal.style.display = 'none';
+                    cropper.destroy();
                 };
                 reader.readAsDataURL(croppedFile);
-
-                cropperModal.style.display = 'none';
-                cropper.destroy();
-            });
+            }, 'image/jpeg');
         });
 
-            
-document.getElementById('product-form').addEventListener('submit', async function (event) {
-    event.preventDefault(); // Prevent the default form submission
-    
-    // Call the validation function
-    if (!validateForm(event)) {
-        return; // If validation fails, prevent form submission
+        document.getElementById('product-form').addEventListener('submit', (event) => {
+    // Validate form fields
+    const productName = document.getElementById('productName').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const regularPrice = parseFloat(document.getElementById('regularPrice').value);
+    const salePrice = parseFloat(document.getElementById('salePrice').value);
+    const category = document.getElementById('category').value.trim();
+    const language = document.getElementById('language').value.trim();
+    const authorTitle = document.getElementById('authorTitle').value.trim();
+    const authorDetails = document.getElementById('authorDetails').value.trim();
+    const quantity = parseInt(document.getElementById('quantity').value);
+
+    let isValid = true;
+
+    // Product Name validation
+    if (productName === '') {
+        isValid = false;
+        document.getElementById('productNameError').innerText = 'Product name is required';
+    } else {
+        document.getElementById('productNameError').innerText = '';
     }
 
-    const form = event.target;
-    const formData = new FormData(form);
-
-    try {
-        const response = await fetch(form.action, {
-            method: 'POST',
-            body: formData
-        });
-
-        const result = await response.json();
-
-        if (result.status === 'success') {
-            Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: result.message,
-            confirmButtonText: 'OK'
-        }).then(() =>{
-
-            window.location.href = "/admin/products"; 
-        })
-        } else {
-            Swal.fire({
-            icon: 'error',
-            title: 'Failed to add Product',
-            text: result.message,
-            confirmButtonText: 'OK'
-        })
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while adding the product.');
+    // Description validation
+    if (description === '') {
+        isValid = false;
+        document.getElementById('descriptionError').innerText = 'Description is required';
+    } else {
+        document.getElementById('descriptionError').innerText = '';
     }
-});
 
-function validateForm(event) {
-    var productName = document.getElementById('productName').value.trim();
-    var description = document.getElementById('description').value.trim();
-    var regularPrice = document.getElementById('regularPrice').value;
-    var salePrice = document.getElementById('salePrice').value;
-    var language = document.getElementById('language').value.trim();
-    var authorTitle = document.getElementById('authorTitle').value.trim();
-    var authorDetails = document.getElementById('authorDetails').value.trim();
-    var quantity = document.getElementById('quantity').value;
-    
-    var errors = false;
+    // Regular Price validation
+    if (isNaN(regularPrice) || regularPrice <= 0) {
+        isValid = false;
+        document.getElementById('regularPriceError').innerText = 'Regular price must be a valid number greater than zero';
+    } else {
+        document.getElementById('regularPriceError').innerText = '';
+    }
 
-    document.querySelectorAll('.error-message').forEach(function(errorMessage) {
-        errorMessage.innerText = "";
+    // Sale Price validation
+    if (isNaN(salePrice) || salePrice <= 0) {
+        isValid = false;
+        document.getElementById('salePriceError').innerText = 'Sale price must be a valid number greater than zero';
+    } else {
+        document.getElementById('salePriceError').innerText = '';
+    }
+
+    // Category validation
+    if (category === '') {
+        isValid = false;
+        document.getElementById('categoryError').innerText = 'Category is required';
+    } else {
+        document.getElementById('categoryError').innerText = '';
+    }
+
+    // Language validation
+    if (language === '') {
+        isValid = false;
+        document.getElementById('languageError').innerText = 'Language is required';
+    } else {
+        document.getElementById('languageError').innerText = '';
+    }
+
+    // Author Title validation
+    if (authorTitle === '') {
+        isValid = false;
+        document.getElementById('authorTitleError').innerText = 'Author title is required';
+    } else {
+        document.getElementById('authorTitleError').innerText = '';
+    }
+
+    // Author Details validation
+    if (authorDetails === '') {
+        isValid = false;
+        document.getElementById('authorDetailsError').innerText = 'Author details are required';
+    } else {
+        document.getElementById('authorDetailsError').innerText = '';
+    }
+
+    // Quantity validation
+    if (isNaN(quantity) || quantity <= 0) {
+        isValid = false;
+        document.getElementById('quantityError').innerText = 'Quantity must be a valid number greater than zero';
+    } else {
+        document.getElementById('quantityError').innerText = '';
+    }
+
+    if (!isValid) {
+        event.preventDefault();
+        return false;
+    }
+
+    // If form is valid, proceed with form submission
+    const formData = new FormData();
+    formData.append('productName', productName);
+    formData.append('description', description);
+    formData.append('regularPrice', regularPrice);
+    formData.append('salePrice', salePrice);
+    formData.append('category', category);
+    formData.append('language', language);
+    formData.append('authorTitle', authorTitle);
+    formData.append('authorDetails', authorDetails);
+    formData.append('quantity', quantity);
+    files.forEach((file, index) => {
+        formData.append('productImage', file);
     });
 
-    if (!productName) {
-        document.getElementById('productNameError').innerText = "Product Name is required";
-        errors = true;
-    }
-
-    if (!description) {
-        document.getElementById('descriptionError').innerText = "Description is required";
-        errors = true;
-    }
-
-    if (regularPrice <= 0) {
-        document.getElementById('regularPriceError').innerText = "Must be greater than 0";
-        errors = true;
-    }
-
-    if (salePrice <= 0) {
-        document.getElementById('salePriceError').innerText = "Must be greater than 0";
-        errors = true;
-    }
-
-    if (!category) {
-        document.getElementById('categoryError').innerText = "Category is required";
-        errors = true;
-    }
-
-    if (!language) {
-        document.getElementById('languageError').innerText = "Language is required";
-        errors = true;
-    }
-
-    if (!authorTitle) {
-        document.getElementById('authorTitleError').innerText = "Author title is required";
-        errors = true;
-    }
-
-    if (!authorDetails) {
-        document.getElementById('authorDetailsError').innerText = "Author details are required";
-        errors = true;
-    }
-
-    if (quantity <= 0) {
-        document.getElementById('quantityError').innerText = "Must be greater than 0";
-        errors = true;
-    }
-
-    if (errors) {
+    fetch('/admin/addProducts', {
+        method: 'POST',
+        body: formData
+    }).then(response => {
+        if (response.ok) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: 'Product added successfully!',
+            }).then(() => {
+                window.location.href = '/admin/products';
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'There was an error adding the product.',
+            });
+        }
+    }).catch(error => {
+        console.error('Error:', error);
         Swal.fire({
             icon: 'error',
-            title: 'Form Validation Error',
-            text: 'Please correct the highlighted errors and try again.',
-            confirmButtonText: 'OK'
+            title: 'Error',
+            text: 'There was an error adding the product.',
         });
-    }
+    });
 
-    return !errors;
-}                    
-
+    event.preventDefault();
+});
 
     </script>
 </body>

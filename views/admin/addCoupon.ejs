@@ -235,6 +235,8 @@
         });
 
         document.getElementById('couponForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
             var couponName = document.getElementById('couponName').value.trim();
             var couponCode = document.getElementById('couponCode').value.trim();
             var description = document.getElementById('description').value.trim();
@@ -242,8 +244,6 @@
             var discount = document.getElementById('discount').value;
             var maxDiscount = document.getElementById('maxDiscount').value;
             var expiryDate = document.getElementById('expiryDate').value;
-
-            var errors = false;
 
             // Clear previous error messages
             document.getElementById('couponNameError').innerText = '';
@@ -253,6 +253,8 @@
             document.getElementById('discountError').innerText = '';
             document.getElementById('maxDiscountError').innerText = '';
             document.getElementById('expiryDateError').innerText = '';
+
+            var errors = false;
 
             if (!couponName) {
                 document.getElementById('couponNameError').innerText = 'Coupon Name is required.';
@@ -283,8 +285,53 @@
                 errors = true;
             }
 
-            if (errors) {
-                event.preventDefault();
+            if (!errors) {
+                var data = {
+                    couponName: couponName,
+                    couponCode: couponCode,
+                    description: description,
+                    minPurchaseAmount: minPurchaseAmount,
+                    discount: discount,
+                    maxDiscount: maxDiscount,
+                    expiryDate: expiryDate
+                };
+
+                fetch('/admin/addCoupon', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(response => {
+                    if (response.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Coupon Added',
+                            text: response.message,
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location.href = '/admin/coupons';
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Failed to Add Coupon',
+                            text: response.message
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Failed to Add Coupon',
+                        text: 'There was an error adding the coupon. Please try again.'
+                    });
+                });
+
+            } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'Validation Error',

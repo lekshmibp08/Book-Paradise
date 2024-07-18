@@ -22,6 +22,9 @@ const verifyLogin = expressAsyncHandler( async (req, res) => {
     console.log(email);
 
     const findAdmin = await User.findOne({email:email})
+    if(!findAdmin) {
+        res.render("adminLogin", { message : "Incorrect Email ID"})
+    }
     console.log(findAdmin);
     if(findAdmin) {
         const paaswordMatch = await bcrypt.compare(password, findAdmin.password)
@@ -31,7 +34,7 @@ const verifyLogin = expressAsyncHandler( async (req, res) => {
             res.redirect("/admin/dashboard")
         } else {
             console.log("Incorrect Password");
-            res.render("adminLogin", { message : "Incorrect Email or Password"})
+            res.render("adminLogin", { message : "Incorrect Password"})
         }
     }
 })
@@ -133,17 +136,17 @@ async function findStatistics() {
                     netAmount: {
                         $add: [
                             { $subtract: ['$totalAmount', '$couponDiscout']},
-                            50  // Adding fixed delivery charge
+                            50  
                         ]
                     },
-                    couponDiscount: '$couponDiscout' // Corrected field name
+                    couponDiscount: '$couponDiscout' 
                 }
             },
             {
                 $group: {
                     _id: null,
                     totalNetSale: { $sum: '$netAmount' },
-                    totalCouponDiscount: { $sum: '$couponDiscount' } // Corrected field name
+                    totalCouponDiscount: { $sum: '$couponDiscount' } 
                 }
             }
         ]);

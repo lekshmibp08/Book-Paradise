@@ -41,13 +41,14 @@ const addToCart = async (req, res) => {
             return res.status(401).json({ status: "Please Login to add products to cart" });
         }
         const productId = req.query.id;
-        const quantity = parseInt(req.query.quantity);
-        console.log("Quantity: ", quantity);
-
-
+        
         const product = await Product.findById(productId);
         if (!product) {
-            return res.status(404).json({ status: "Product not found" });
+            return res.status(200).json({ status: false, message: "Product not found" });
+        }
+        if (product.quantity < 1) {
+            console.log("ENTERED OUT OF STOCK");
+            return res.status(200).json({ status: false, message: "Product Out of Stock"})
         }
 
         const cartExist = await Cart.findOne({ userId });
@@ -56,85 +57,39 @@ const addToCart = async (req, res) => {
             const itemIndex = cartExist.items.findIndex(item => item.product.toString() === product._id.toString());
 
             if (itemIndex > -1) {
-                if (quantity === 0) {
-                    // Remove the product from the cart
-                    cartExist.items.splice(itemIndex, 1);
-                    cartExist.totalPrice = cartExist.items.reduce((acc, item) => acc + (item.price * item.itemQuantity), 0);
-                    cartExist.totalMRP = cartExist.items.reduce((acc, item) => acc + (item.MRP * item.itemQuantity), 0);
-                    await cartExist.save();
-                    return res.status(200).json({ status: "Product Removed from the Cart" });
-                } else {
-                    if (quantity > product.quantity) {
-                        return res.status(400).json({ status: "Out of Stock" });
-                    } else if (quantity <= 5) {
-                        // Update the quantity of the existing product in the cart
-                        cartExist.items[itemIndex].itemQuantity = quantity;
-                        cartExist.items[itemIndex].price = product.salePrice;
-                        cartExist.totalPrice = cartExist.items.reduce((acc, item) => acc + (item.price * item.itemQuantity), 0);
-                        cartExist.totalMRP = cartExist.items.reduce((acc, item) => acc + (item.MRP * item.itemQuantity), 0);
-                        await cartExist.save();
-                        return res.status(200).json({ status: "Product Cart Updated" });
-                    } else {
-                        return res.status(400).json({ status: "Max quantity per product is 5" });
-                    }
-                }
-            } else {
-                if (quantity === 0) {
-                    return res.status(400).json({ status: "Invalid Quantity" });
-                } else if (quantity <= product.quantity) {
-                    if (quantity <= 5) {
-                        // Add the new product to the cart
-                        cartExist.items.push({
-                            product: productId,
-                            name: product.productName,
-                            MRP: product.regularPrice,
-                            price: product.salePrice,
-                            itemQuantity: quantity
-                        });
-                        cartExist.totalPrice = cartExist.items.reduce((acc, item) => acc + (item.price * item.itemQuantity), 0);
-                        cartExist.totalMRP = cartExist.items.reduce((acc, item) => acc + (item.MRP * item.itemQuantity), 0);
-                        await cartExist.save();
-                        return res.status(200).json({ status: "Product Added to Cart" });
-                    } else {
-                        return res.status(400).json({ status: "Max quantity per product is 5" });
-                    }
-                } else {
-                    return res.status(400).json({ status: "Out of Stock" });
-                }
+                return res.status(200).json({ status: true, message: 'Product is already in the cart'})
+            } else {    
+                // Add the new product to the cart
+                cartExist.items.push({
+                    product: productId,
+                    name: product.productName,
+                    MRP: product.regularPrice,
+                    price: product.salePrice,
+                    itemQuantity: 1
+                });
+                cartExist.totalPrice = cartExist.items.reduce((acc, item) => acc + (item.price * item.itemQuantity), 0);
+                cartExist.totalMRP = cartExist.items.reduce((acc, item) => acc + (item.MRP * item.itemQuantity), 0);
+                await cartExist.save();
+                return res.status(200).json({ status: true, message: "Product Added to Cart" });                        
             }
-        } else {
-            if (quantity === 0) {
-                console.log("no Cart Stage 1");
-                return res.status(400).json({ status: "Invalid Quantity" });
-            } else if (quantity <= product.quantity) {
-                console.log("no Cart Stage 2");
-                if (quantity <= 5) {
-                    console.log("no Cart Stage 3");
-                    // Create a new cart
-                    const newCart = new Cart({
-                        userId: userId,
-                        items: [{
-                            product: productId,
-                            name: product.productName,
-                            MRP: product.regularPrice,
-                            price: product.salePrice,
-                            itemQuantity: quantity
-                        }],
-                        totalPrice: product.salePrice * quantity,
-                        totalMRP: product.regularPrice * quantity,
-                        createdOn: Date.now()
-                    });
-                    await newCart.save();
-                    console.log("no Cart Stage 4");
-                    return res.status(200).json({ status: "Product Added to Cart" });
-                } else {
-                    console.log("no Cart Stage 5");
-                    return res.status(400).json({ status: "Max quantity per product is 5" });
-                }
-            } else {
-                console.log("no Cart Stage 6");
-                return res.status(400).json({ status: "Out of Stock" });
-            }
+        } else {            
+            // Create a new cart
+            const newCart = new Cart({
+                userId: userId,
+                items: [{
+                    product: productId,
+                    name: product.productName,
+                    MRP: product.regularPrice,
+                    price: product.salePrice,
+                    itemQuantity: 1
+                }],
+                totalPrice: product.salePrice ,
+                totalMRP: product.regularPrice ,
+                createdOn: Date.now()
+            });
+            await newCart.save();
+            return res.status(200).json({ status: true, message: "Product Added to Cart" });
+                
         }
     } catch (error) {
         console.log(error.message);

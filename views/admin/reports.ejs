@@ -186,81 +186,81 @@
         }
 
         .header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-.header-title {
-    margin: 0;
-}
+        .header-title {
+            margin: 0;
+        }
 
-.button-wrapper {
-    display: flex;
-    gap: 20px; /* Space between buttons */
-}
+        .button-wrapper {
+            display: flex;
+            gap: 20px; /* Space between buttons */
+        }
 
-.button-wrapper .report {
-    display: flex;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: #6f42c1;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
+        .button-wrapper .report {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #6f42c1;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
 
-.button-wrapper .report:hover {
-    background-color: #4c2c86;
-}
+        .button-wrapper .report:hover {
+            background-color: #4c2c86;
+        }
 
-.button-wrapper .report i {
-    margin-right: 5px;
-}
+        .button-wrapper .report i {
+            margin-right: 5px;
+        }
 
-.pagination {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-    list-style: none;
-    padding: 0;
-}
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            list-style: none;
+            padding: 0;
+        }
 
-.pagination .page-item {
-    margin: 0 5px;
-}
+        .pagination .page-item {
+            margin: 0 5px;
+        }
 
-.pagination .page-link {
-    display: block;
-    padding: 10px 15px;
-    background-color: #6f42c1;
-    color: #fff;
-    border: 1px solid #6f42c1;
-    border-radius: 5px;
-    text-decoration: none;
-    transition: background-color 0.3s, color 0.3s;
-}
+        .pagination .page-link {
+            display: block;
+            padding: 10px 15px;
+            background-color: #6f42c1;
+            color: #fff;
+            border: 1px solid #6f42c1;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s, color 0.3s;
+        }
 
-.pagination .page-link:hover {
-    background-color: #4c2c86;
-    color: #fff;
-}
+        .pagination .page-link:hover {
+            background-color: #4c2c86;
+            color: #fff;
+        }
 
-.pagination .page-item.active .page-link {
-    background-color: #4c2c86;
-    border-color: #4c2c86;
-}
+        .pagination .page-item.active .page-link {
+            background-color: #4c2c86;
+            border-color: #4c2c86;
+        }
 
-.pagination .page-item.disabled .page-link {
-    background-color: #e9ecef;
-    color: #6c757d;
-    border-color: #dee2e6;
-}
+        .pagination .page-item.disabled .page-link {
+            background-color: #e9ecef;
+            color: #6c757d;
+            border-color: #dee2e6;
+        }
 
-/****************************/
-/*******Breadcrumb CSS*******/
-/****************************/
+        /****************************/
+        /*******Breadcrumb CSS*******/
+        /****************************/
 
         .breadcrumb {
             background-color: #f8f9fa; /* Light background color */
@@ -430,6 +430,8 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.16.7/dist/sweetalert2.all.min.js"></script>
+
     <script>
         document.getElementById('toggle-btn').addEventListener('click', function() {
             var sidebar = document.getElementById('sidebar');
@@ -473,32 +475,58 @@
     
             if (dateFilterSelect.value === 'custom') {
                 if (!startDateInput.value) {
-                    alert('Please select a start date');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid Date',
+                        text: 'Please select a start date',
+                        confirmButtonText: 'OK'
+                    })
                     return;
                 }
     
                 if (!endDateInput.value) {
-                    alert('Please select an end date');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid Date',
+                        text: 'Please select an end date',
+                        confirmButtonText: 'OK'
+                    })
                     return;
                 }
-/*    
+    
                 const startDate = new Date(startDateInput.value);
                 const endDate = new Date(endDateInput.value);
                 const today = new Date();
     
                 if (startDate >= endDate) {
-                    alert('The start date must be less than the end date.');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid Date',
+                        text: 'The start date must be less than the end date.',
+                        confirmButtonText: 'OK'
+                    })
                     return;
                 }
     
                 if (startDate >= today || endDate >= today) {
-                    alert('Ensure the selected date is not after today.');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid Date',
+                        text: 'Ensure the selected date is not after today.',
+                        confirmButtonText: 'OK'
+                    })
                     return;
                 }
-*/                
+                
             }
     
             form.submit();
+            modal.style.display = 'none';
+        });
+
+        // Close modal when close button is clicked
+        const closeButton = document.querySelector('.close-button');
+        closeButton.addEventListener('click', () => {
             modal.style.display = 'none';
         });
     </script>

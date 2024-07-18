@@ -163,9 +163,9 @@
                             <% order.items.forEach((item, index) => { %>
                                 <tr>
                                     <td><%= index + 1 %></td>
-                                    <td>
+                                    <td><a href="/productDetails?id=<%= item.product.id%>">
                                         <div><img src="/uploads/product-images/<%= item.product.productImage[0] %>" 
-                                        alt="<%= item.product.name %>" style="width: 40px; height: auto;"></div>
+                                        alt="<%= item.product.name %>" style="width: 40px; height: auto;"></div></a>
                                     </td>
 
                                     <td><a href="/productDetails?id=<%= item.product.id%>"><%= item.product.productName %></a></td>

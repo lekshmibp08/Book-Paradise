@@ -39,9 +39,9 @@ router.post("/category/apply-offer", isAdmin, categoryController.applyCategoryOf
 //Product Management
 router.get("/products", isAdmin, productController.getAllProducts)
 router.get("/addProducts", isAdmin, productController.getProductAddPage)
-router.post("/addProducts", isAdmin, uploadProduct.array("productImage", 5), productController.addProducts)
+router.post("/addProducts", isAdmin, uploadProduct.array("productImage", 4), productController.addProducts)
 router.get("/editProduct", isAdmin, productController.getEditProduct)
-router.post("/editProduct/:id", isAdmin, uploadProduct.array("productImage", 5), productController.editProduct)
+router.post("/editProduct/:id", isAdmin, uploadProduct.array("productImage", 4), productController.editProduct)
 router.delete("/deleteProductImage/:productId/:imageName", isAdmin, productController.deleteImage)
 router.post("/blockProduct", isAdmin, productController.blockProduct)
 router.post("/unBlockProduct", isAdmin, productController.unblockProduct)

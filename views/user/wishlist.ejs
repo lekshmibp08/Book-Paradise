@@ -40,7 +40,7 @@
                                     <% products.forEach(function(product) { %>
                                         <tr>
                                             <td>
-                                                <a href="#">
+                                                <a href="/productDetails?id=<%= product.id %>">
                                                     <% if (product.productImage && product.productImage.length > 0) { %>
                                                         <img src="/uploads/product-images/<%= product.productImage[0] %>" alt="Image">
                                                     <% } else { %>
@@ -49,7 +49,9 @@
                                                 </a>
                                             </td>
                                             <td>
-                                                <a href="#"><%= product.productName %></a>
+                                                <a href="/productDetails?id=<%= product.id %>">
+                                                    <%= product.productName %>
+                                                </a>
                                                 <p>By <%= product.authorTitle %></p>
                                             </td>
                                             <td>₹ <%= product.salePrice %></td> 

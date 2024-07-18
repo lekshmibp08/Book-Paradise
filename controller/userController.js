@@ -535,10 +535,7 @@ const getShopPage = async (req, res) => {
         const languages = languageSet.map((item) => item.language);
 
 //Pagination
-        let page = 1;
-        if (req.query.page) {
-            page = req.query.page;
-        }
+        let page = parseInt(req.query.page) || 1;
         let itemsPerPage = 6;
 
 
