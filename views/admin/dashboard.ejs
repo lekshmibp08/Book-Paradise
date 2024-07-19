@@ -206,7 +206,6 @@
                     </div>
                 </div>
                 <div class="main-content" id="main-content">
-                    <h1>Dashboard</h1>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
@@ -252,6 +251,12 @@
                         </div>
                         <canvas id="salesChart" width=auto height="100"></canvas>                        
                     </div>
+
+                    <div class="chart mb-4">
+                        <h2>Category Sales</h2>
+                        <canvas id="categorySalesChart"></canvas>
+                    </div>
+                    
                     <div class="row">
                         <div class="col-lg-6 mb-4">
                             <div class="top-selling">
@@ -314,7 +319,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!--
     <script>
         document.addEventListener("DOMContentLoaded", function () {
 
@@ -327,11 +331,11 @@
 
         
     </script>
-    -->
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const orderData = JSON.parse('<%- JSON.stringify(orderData) %>');
+            
 
             let salesChart; // Reference to the current chart instance
 
@@ -450,6 +454,39 @@
                 const weekData = generateWeeklyChartData(orderData);
                 renderChart(weekData, 'rgba(75, 192, 192, 1)');
             });
+
+            
+    //Categoey graph logic
+            const categorySalesDataStr = `<%- JSON.stringify(categorySalesData) %>`;
+
+            // Parse the JSON string back to an object
+            const categorySalesData = JSON.parse(categorySalesDataStr);
+            // Extract labels and sales data
+            const labels = categorySalesData.map(data => data.category);
+            const sales = categorySalesData.map(data => data.sales);
+            // Generate the chart
+            const ctx = document.getElementById('categorySalesChart').getContext('2d');
+            const categorySalesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Category Sales',
+                        data: sales,
+                        backgroundColor: 'rgba(128, 0, 128, 0.2)',
+                        borderColor: 'rgba(128, 0, 128, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
         });
     </script>
 

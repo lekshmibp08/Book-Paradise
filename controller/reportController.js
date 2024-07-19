@@ -102,8 +102,8 @@ const generateReport = async( req, res ) => {
                 orders: customDateOrders
             }];
         }
-        console.log(ordersGroup);
 
+        
 //Logic to generate Sales Report PDF
         if (reportType === 'pdf') {
             

@@ -120,12 +120,12 @@
         }
 
         .breadcrumb a {
-            color: #007bff; /* Blue color for links */
+            color: #6f42c1; /* Blue color for links */
             text-decoration: none; /* No underline for links */
         }
 
         .breadcrumb a:hover {
-            color: #0056b3; /* Darker blue on hover */
+            color: #5a36a3; /* Darker blue on hover */
             text-decoration: underline; /* Underline on hover */
         }
 
@@ -183,6 +183,11 @@
         .header-content .add-coupon-btn {
             margin-top: 10px;
             flex-shrink: 0;
+            background-color: #6f42c1;
+            color: white;
+        }
+        .header-content .add-coupon-btn:hover {
+            background-color: #5a36a3;
         }
         .form-group {
             margin-bottom: 1.5rem;
@@ -229,7 +234,7 @@
                     </nav>
                     <div class="header-content">
                         <h2>Coupon</h2>
-                        <a href="/admin/addCoupon" class="btn btn-primary add-coupon-btn">+ Add Coupon</a>
+                        <a href="/admin/addCoupon" class="btn add-coupon-btn">+ Add Coupon</a>
 
                     </div>
                     <div class="coupon-table">

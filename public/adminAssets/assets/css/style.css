@@ -545,7 +545,7 @@ select {
 /****************************/
 
 .breadcrumb {
-    background-color: #f8f9fa; /* Light background color */
+    background-color: #f0f3f6; /* Light background color */
     border-radius: 0.25rem; /* Rounded corners */
     padding: 0.75rem 1rem; /* Padding inside the breadcrumb */
     margin-bottom: 1rem; /* Space below the breadcrumb */
@@ -559,12 +559,12 @@ select {
 }
 
 .breadcrumb a {
-    color: #007bff; /* Blue color for links */
+    color: #6f42c1; /* Blue color for links */
     text-decoration: none; /* No underline for links */
 }
 
 .breadcrumb a:hover {
-    color: #0056b3; /* Darker blue on hover */
+    color: #4c2d86; /* Darker blue on hover */
     text-decoration: underline; /* Underline on hover */
 }
 

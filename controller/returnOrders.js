@@ -13,9 +13,6 @@ const getReturnOrders = async( req, res ) =>{
             .populate('userId')
             .sort({ createdAt: -1})
 
-
-            console.log(returnOrders);
-
         res.render('returnOrders', { returnOrders, format })
     } catch (error) {
         console.log(error.message);
@@ -88,7 +85,6 @@ const updateReturnOrderStatus = async( req, res ) => {
             let refundAmount = returnOrder.orderId.totalAmount - returnOrder.orderId.couponDiscout;
             let description = `Refund, Order Id: ${returnOrder.orderId.orderId}` 
 
-            console.log(refundAmount);
             const transaction = new Transaction({
                 userId: returnOrder.userId._id,
                 amount: refundAmount,
@@ -97,7 +93,6 @@ const updateReturnOrderStatus = async( req, res ) => {
                 status: 'completed'
             })
             await transaction.save();
-            console.log(transaction);
 
             let wallet = await Wallet.findOne({userId: returnOrder.userId._id});
             
@@ -111,7 +106,6 @@ const updateReturnOrderStatus = async( req, res ) => {
             wallet.balance += refundAmount;
             wallet.transactions.push(transaction._id);
             await wallet.save();
-            console.log(wallet);
         }
         res.json({ status: true, message: 'Status Updated Successfully..!' });
     } catch (error) {

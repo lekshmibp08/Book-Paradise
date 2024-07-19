@@ -1,5 +1,123 @@
 
-    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        
+        .profile-container, .address-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .profile-container h2, .address-container h4 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .profile-details, .address-details {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .profile-details li, .address-details li {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .profile-details li:last-child, .address-details li:last-child {
+            border-bottom: none;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .edit-address-button, .delete-address-button {
+            display: block;
+            width: 48%;
+            padding: 10px;
+            text-align: center;
+            background-color: #3F69AA;
+            color: #fff;
+            text-decoration: none;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .edit-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            text-align: center;
+            background-color: #3F69AA;
+            color: #fff;
+            text-decoration: none;
+            border: none;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        
+        .add-address-button {
+            display: block;
+            width: 200px;
+            margin-left: 580px;
+            position: absolute;
+            padding: 10px;
+            text-align: center;
+            background-color: #3F69AA;
+            color: #fff;
+            text-decoration: none;
+            border: none;
+            border-radius: 4px;
+            margin-top: -15px;
+        }
+        
+        .edit-button:hover, .add-address-button:hover, .edit-address-button:hover{
+            background-color: #0f9308;
+            color: #fff;
+        }
+
+        .form.delete-address-button:hover {
+            background-color: red;
+            color: black;
+        }
+        
+        @media (max-width: 600px) {
+            .profile-details li, .address-details li {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        
+            .profile-details li span, .address-details li span {
+                margin-bottom: 5px;
+            }
+        
+            .button-container {
+                flex-direction: column;
+            }
+                
+            .add-address-button {
+                width: 100%;
+                margin-left: 0;
+                position: static;
+            }
+        }
+        .position-relative {
+            position: relative;
+        }
+        .position-absolute {
+            position: absolute;
+        }
+
+    </style>
 
 <%- include("../partials/header") %>
 

@@ -181,10 +181,7 @@ const showCoupons = async( req, res ) =>{
             ...coupon._doc,
             expiryDate: moment(coupon._doc.expiryDate).format('MMMM D, YYYY')
         }))
-        /*coupons.map(coupon =>{
-            console.log("Data : ", coupon.name);
-
-        })*/
+        
        console.log(couponData);
        //console.log("subtotal :", subTotal);
        res.json({ success: true, coupons: couponData }); 

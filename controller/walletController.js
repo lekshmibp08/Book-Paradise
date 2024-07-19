@@ -35,7 +35,6 @@ const initiatePayment = async (req, res) => {
         }
 
         const { amount, note } = req.body;
-        console.log(`AMOUNT: ${amount}, NOTE: ${note}`);
 
         // Validate amount
         if (!amount || amount <= 0) {

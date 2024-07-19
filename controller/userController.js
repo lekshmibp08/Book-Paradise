@@ -46,9 +46,6 @@ const getHomePage = async(req, res) => {
         const productData = await Product.find({ isBlocked: false })
         const cart = await Cart.findOne({userId: userId})
 
-        console.log(userId);
-        console.log(cart);
-        
         res.render("home", { user, productData, cart })
         
     } catch (error) {
@@ -82,7 +79,6 @@ const getLoginPage = async (req, res) => {
             res.render("login", { message });
         }
         else{
-            console.log("test");
             res.redirect("/")
         }
     }
@@ -115,7 +111,6 @@ const verifyEmail = async (req, res) =>{
             if( !findUser )
                 {
                     const otp = generateOTP();
-                    console.log(otp);;
                     const transporter = nodemailer.createTransport({
                         service: 'gmail',
                         host:'smtp.gmail.com',
@@ -137,7 +132,6 @@ const verifyEmail = async (req, res) =>{
                         if(error){
                             console.log(error);
                         }else{
-                            console.log('Email has been sent successfully');
                             req.session.userOtp = otp
                             req.session.userData = req.body
                             res.render("verify-otp")
@@ -146,7 +140,6 @@ const verifyEmail = async (req, res) =>{
                 }
                 else
                 {
-                    console.log("User already Exist");
                     res.render("signup", { message: "User with this email already exists" })
                 }
             }
@@ -178,7 +171,6 @@ const resendOTP = async (req, res) => {
     try {
         const email = req.session.userData.email;
         const otp = generateOTP();
-        console.log(`Email : ${email} OTP : ${otp}`);
 
         const transporter = nodemailer.createTransport({
             service: 'gmail',
@@ -220,12 +212,9 @@ const resendOTP = async (req, res) => {
 const verifyOTP = async (req, res) => {
     try {
         const { otp } = req.body
-        //console.log('Received OTP:', otp);
-        //console.log('Session OTP:', req.session.userOtp);
-        console.log(req.session.userData);
+        
         if ( otp == req.session.userOtp) {
             const referralCode = generateReferralCode();
-            console.log(referralCode);
             const user = req.session.userData
             const passwordHash = await securePassword(user.password)
 
@@ -238,7 +227,6 @@ const verifyOTP = async (req, res) => {
             })
 
             await newUser.save()
-            console.log(newUser);
 
             const newUserWallet = new Wallet({
                 userId: newUser._id,
@@ -262,13 +250,11 @@ const verifyOTP = async (req, res) => {
                             balance: 0
                         })
                     }
-                    console.log("Reffering Wallet;", referringUserWallet);
                     newUserWallet.balance += 50;
                     referringUserWallet.balance += 250;
                     
                     await newUserWallet.save();
                     await referringUserWallet.save();
-                    console.log("Reffering Wallet;", referringUserWallet);
 
                     const newUserTransaction = new Transaction({
                         userId: newUser._id,
@@ -293,7 +279,6 @@ const verifyOTP = async (req, res) => {
                     await referringUserTransaction.save();
                     
                 } else {
-                    console.log('Invalid Referral Code');
                     await User.findByIdAndDelete(newUser._id);
                     return res.json({status: false, message: "Invalid Referral Code" });
                 }
@@ -307,7 +292,6 @@ const verifyOTP = async (req, res) => {
             req.session.user = newUser._id;
             return res.json({ status : true })
         } else {
-            console.log("OTP not Matching");
             res.json({ status : false, message: "OTP not Matching" })
         }
         
@@ -321,10 +305,8 @@ const verifyOTP = async (req, res) => {
 //Load Home Page for user
 const userLogin = expressAsyncHandler( async (req, res) => {
     const { email, password } = req.body
-    console.log("User in Home : ",req.body);
 
     const findUser = await User.findOne({ email: email, isAdmin:false })
-    console.log("User in Home Found : ",findUser);
     
     if (findUser) {
         const isUserNotBlocked = findUser.isBlocked === false;
@@ -332,18 +314,14 @@ const userLogin = expressAsyncHandler( async (req, res) => {
             const passwordMatch = await bcrypt.compare(password, findUser.password)
             if (passwordMatch) {
                 req.session.user = findUser._id
-                console.log("Logged in");
                 res.redirect("/")
             } else {
-                console.log("Password is not matching");
                 res.render("login", { message: "Password is not matching" })
             }
         } else {
-            console.log("User is blocked by admin");
             res.render("login", { message: "User is blocked by admin" })
         }
     } else {
-        console.log("User is not found");
         res.render("login", { message: "User not found" })
     }
 })
@@ -404,15 +382,12 @@ const sendResetPasswordMail = async (name, email, token) =>{
 //Send rest Link
 const forgetVerify = expressAsyncHandler( async(req, res) => {
     const email = req.body.email;
-    console.log(req.body.email);
     const userData = await User.findOne({ email : email, isAdmin:false});
-    console.log(userData);
+
     if(userData) {
         const randomString = randomstring.generate();
         const updatedData = await User.updateOne({ email:email }, {$set : { token : randomString }}, { new: true })
-        console.log(updatedData);
         const updatedUserData = await User.findOne({ email:email })
-        console.log("updated User Data :", updatedUserData);
         sendResetPasswordMail(updatedUserData.name, updatedUserData.email, updatedUserData.token)
         res.render("forget", { message : "Check your Mail to Reset Password" })
     } else {
@@ -424,9 +399,8 @@ const forgetVerify = expressAsyncHandler( async(req, res) => {
 //Password reset router
 const getResetPassword = expressAsyncHandler( async(req, res) => {
     const token = req.query.token;
-    console.log(req.query.token);
     const tokenData = await User.findOne({ token:token })
-    console.log(tokenData);
+
     if(tokenData) {
         res.render("reset-password", { user_id : tokenData._id })
     }
@@ -439,7 +413,6 @@ const getResetPassword = expressAsyncHandler( async(req, res) => {
 //Password Resetting
 const resetPassword = expressAsyncHandler( async(req, res) => {
     const password = req.body.password;
-    console.log("New password : ", password);
     const user_id = req.body.user_id;
     const passwordHash = await securePassword(password);
     const updatedData = await User.findByIdAndUpdate({ _id: user_id }, { $set: { password : passwordHash, token : ""}})
@@ -487,9 +460,6 @@ const getShopPage = async (req, res) => {
         const searchQuery = req.query.search || '';
         const categoryFilters = req.query.categories ? req.query.categories.split(',') : [];
         const languageFilters = req.query.languages ? req.query.languages.split(',') : [];
-
-        console.log("SORT: ", sortOption);
-        console.log("SEARCH: ", searchQuery);
 
 // Search and Filter Products
         const searchCondition = {
@@ -572,14 +542,11 @@ const getShopPage = async (req, res) => {
 const getProductDetails = async (req, res) => {
     try {
         const user = req.session.user
-        console.log("user :", user);
         const id = req.query.id
-        console.log("Query Id :", id);
         const findProduct = await Product.findOne({ id: id });
         const findCategory = await Category.findOne({name : findProduct.category})
         // console.log(findCategory);
        
-        console.log(findProduct.id, "Hello world");
         if (user) {
             res.render("product-details", { data: findProduct, user: user })
         } else {

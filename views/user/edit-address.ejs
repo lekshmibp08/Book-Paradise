@@ -64,8 +64,8 @@
 <div class="breadcrumb-wrap">
     <div class="container">
         <ul class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">My Account</a></li>
-            <li class="breadcrumb-item"><a href="/product">Address</a></li>
+            <li class="breadcrumb-item"><a href="/profile">My Account</a></li>
+            <li class="breadcrumb-item"><a href="/profile?tab=address">Address</a></li>
             <li class="breadcrumb-item active">Edit-Address</li>
         </ul>
     </div>
@@ -136,6 +136,7 @@
         if (nameInput.value.trim() === '') {
             nameAlert.textContent = 'Name cannot be empty or just spaces.';
             nameAlert.style.display = 'block';
+            nameAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
             isValid = false;
         } else {
             nameAlert.style.display = 'none';
@@ -144,6 +145,7 @@
         if (!/^\d{10}$/.test(mobileInput.value.trim())) {
             mobileAlert.textContent = 'Mobile number must be a 10-digit number.';
             mobileAlert.style.display = 'block';
+            mobileAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
             isValid = false;
         } else {
             mobileAlert.style.display = 'none';
@@ -152,6 +154,7 @@
         if (addressInput.value.trim() === '') {
             addressAlert.textContent = 'Address cannot be empty or just spaces.';
             addressAlert.style.display = 'block';
+            addressAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
             isValid = false;
         } else {
             addressAlert.style.display = 'none';
@@ -160,6 +163,7 @@
         if (localityInput.value.trim() === '') {
             localityAlert.textContent = 'Locality cannot be empty or just spaces.';
             localityAlert.style.display = 'block';
+            localityAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
             isValid = false;
         } else {
             localityAlert.style.display = 'none';
@@ -168,6 +172,7 @@
         if (cityInput.value.trim() === '') {
             cityAlert.textContent = 'City cannot be empty or just spaces.';
             cityAlert.style.display = 'block';
+            cityAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
             isValid = false;
         } else {
             cityAlert.style.display = 'none';
@@ -176,6 +181,7 @@
         if (stateInput.value.trim() === '') {
             stateAlert.textContent = 'State cannot be empty or just spaces.';
             stateAlert.style.display = 'block';
+            stateAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
             isValid = false;
         } else {
             stateAlert.style.display = 'none';
@@ -184,6 +190,7 @@
         if (!/^\d{6}$/.test(pincodeInput.value.trim())) {
             pincodeAlert.textContent = 'Pincode must be a 6-digit number.';
             pincodeAlert.style.display = 'block';
+            pincodeAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
             isValid = false;
         } else {
             pincodeAlert.style.display = 'none';

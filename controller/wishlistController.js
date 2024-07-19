@@ -24,13 +24,10 @@ const getWishlistPage = async (req, res) => {
 const addToWishlist = async (req, res) => {
     try {
         const id = req.session.user;
-        const productId = req.query.id;
-        console.log("User : ", id);
-        console.log("Product ID : ", productId);
-    
+        const productId = req.query.id;        
         const user = await User.findById(id);
+        
         if (user) {
-            console.log("user true");
             const alreadyAdded = user.wishlist.includes(productId);
             if (alreadyAdded) {
 
@@ -38,17 +35,14 @@ const addToWishlist = async (req, res) => {
                     $pull: { wishlist: productId }
                 }, { new: true });
                 res.status(200).json({ message: 'Removed from wishlist', productId, added: false });
-                console.log('Removed from wishlist');
     
             } else {
                 let updatedUser = await User.findByIdAndUpdate(id, {
                     $push: { wishlist: productId }
                 }, { new: true });
                 res.status(200).json({ message: 'Added to wishlist', productId, added: true });
-                console.log('Added to wishlist');
             }
         } else {
-            console.log("if user false");
             res.status(404).json({ message: 'User not found. Please Login to access Wishlist...'});            
         }
         
@@ -65,11 +59,9 @@ const deleteFromWishlist = async( req, res ) =>{
         
         const userId = req.session.user;
         const productId = req.query.id;
-        console.log(req.query.id);
         const updatedUser = await User.findByIdAndUpdate(userId, {
             $pull: { wishlist: productId}
         })
-        console.log("Product removed");
         res.redirect('/wishlist')
             
     } catch (error) {
@@ -114,7 +106,6 @@ const addToCartFromWishlist = async( req, res ) =>{
             await user.save();
             res.json({ success: true, message: 'Product added to cart successfully' });
         } else {
-            console.log('Product not found');
             res.status(404).json({ success: false, message: 'Product not found in wishlist' });
         }
     } catch (error) {

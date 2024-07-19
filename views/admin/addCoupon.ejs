@@ -130,6 +130,37 @@
             margin-top: -10px;
             margin-bottom: 10px;
         }
+        /****************************/
+        /*******Breadcrumb CSS*******/
+        /****************************/
+            
+        .breadcrumb {
+            background-color: #f8f9fa; /* Light background color */
+            border-radius: 0.25rem; /* Rounded corners */
+            padding: 0.75rem 1rem; /* Padding inside the breadcrumb */
+            margin-bottom: 1rem; /* Space below the breadcrumb */
+        }
+    
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: ">";
+            color: #6c757d; /* Dark gray color for the separator */
+            margin-right: 0.5rem;
+            margin-left: 0.5rem;
+        }
+    
+        .breadcrumb a {
+            color: #6f42c1; /* Blue color for links */
+            text-decoration: none; /* No underline for links */
+        }
+    
+        .breadcrumb a:hover {
+            color: #4b2c85; /* Darker blue on hover */
+            text-decoration: underline; /* Underline on hover */
+        }
+    
+        .breadcrumb-item.active {
+            color: #6c757d; /* Dark gray for active item */
+        }        
     </style>
 </head>
 <body>
@@ -163,6 +194,13 @@
                     </div>
                 </div>
                 <div class="main-content" id="main-content">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
+                            <li class="breadcrumb-item"><a href="/admin/coupons">Coupons</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Add Coupon</li>
+                        </ol>
+                    </nav>
                     <div class="header-content">
                         <h2>Add Coupon</h2>
                     </div>
@@ -228,6 +266,7 @@
             mainContent.classList.toggle('active');
         });
 
+//Disable Previous dates of today        
         document.addEventListener('DOMContentLoaded', function() {
             var expiryDateInput = document.getElementById('expiryDate');
             var today = new Date().toISOString().split('T')[0];

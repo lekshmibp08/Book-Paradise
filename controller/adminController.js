@@ -56,13 +56,15 @@ const getDashboard = async(req, res) => {
         const topProducts = await findTopProducts();
         const topCategory = await findTopCategory();
         const orderData = await processOrdersData();
-        console.log(orderData);
+        const categorySalesData = await generateCategorySalesData();
+        console.log(categorySalesData);
 
         res.render("dashboard", {
             statistics,
             topProducts,
             topCategory,
-            orderData
+            orderData,
+            categorySalesData
         });
     } catch (error) {
         console.log('ERROR: ', error);
@@ -123,6 +125,75 @@ async function processOrdersData() {
 
     } catch (error) {
         console.log('ERROR: ', error);
+    }
+}
+
+
+//Logic to generate category wise sales
+async function generateCategorySalesData() {
+    try {
+        const categorySalesData = await Order.aggregate([
+            {
+                $match: {
+                    $or: [
+                        { status: { $ne: 'Pending' } },
+                        { 
+                            $and: [
+                                { paymentMethod: 'Cash on Delivery' },
+                                { $nor: [{ status: 'Cancelled' }, { status: "Pending" }] }
+                            ] 
+                        }
+                    ]
+                }
+            },
+            { $unwind: '$items' },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'items.product',
+                    foreignField: '_id',
+                    as: 'product'
+                }
+            },
+            { $unwind: '$product' },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: '$createdAt' },
+                        month: { $month: '$createdAt' },
+                        week: { $week: '$createdAt' },
+                        category: '$product.category'
+                    },
+                    totalSales: { $sum: '$items.total' }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    year: '$_id.year',
+                    month: '$_id.month',
+                    week: '$_id.week',
+                    category: '$_id.category',
+                    totalSales: 1
+                }
+            }
+        ]);
+        console.log(categorySalesData);
+
+        const processedData = categorySalesData.reduce((acc, { year, month, week, category, totalSales }) => {
+            if (!acc[category]) {
+                acc[category] = 0;
+            }
+            acc[category] += totalSales;
+            return acc;
+        }, {});
+    
+        // Convert the processedData object into an array of { category, sales } objects
+        return Object.entries(processedData).map(([category, sales]) => ({ category, sales }));
+
+    } catch (error) {
+        console.error('ERROR: ', error);
+        throw error;
     }
 }
 

@@ -104,7 +104,7 @@
     <div class="container">
         <ul class="breadcrumb">
             <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item"><a href="/profile">Orders</a></li>
+            <li class="breadcrumb-item"><a href="/profile?tab=orders">Orders</a></li>
             <li class="breadcrumb-item active">Order Details</li>
         </ul>
     </div>
@@ -136,12 +136,14 @@
         <div class="order-container">
             <h3>Shipping Address</h3>
             <ul class="order-details">
-                <li><span>Name</span><span><%= order.billingAddress.name %></span></li>
-                <li><span>Address Line 1</span><span><%= order.billingAddress.addressLine %></span></li>
-                <li><span>Locality</span><span><%= order.billingAddress.locality %></span></li>
-                <li><span>City</span><span><%= order.billingAddress.city %></span></li>
-                <li><span>State</span><span><%= order.billingAddress.state %></span></li>
-                <li><span>PIN Code</span><span><%= order.billingAddress.pin %></span></li>
+                <% if (order.billingAddress) { %>
+                    <li><span>Name</span><span><%= order.billingAddress.name %></span></li>
+                    <li><span>Address Line 1</span><span><%= order.billingAddress.addressLine %></span></li>
+                    <li><span>Locality</span><span><%= order.billingAddress.locality %></span></li>
+                    <li><span>City</span><span><%= order.billingAddress.city %></span></li>
+                <% } else { %>
+                    <li><span style="color: red;">Address is not available</span></li>
+                <% } %>
             </ul>
         </div>
 
@@ -281,9 +283,9 @@
                     }
                 },
                 prefill: {
-                    name: '<%= order.billingAddress.name %>',
-                    email: '<%= order.billingAddress.email %>',
-                    contact: '<%= order.billingAddress.phone %>'
+                    name: 'user',
+                    email: 'user@sample.com',
+                    contact: '999999999'
                 },
                 theme: {
                     color: '#3399cc'

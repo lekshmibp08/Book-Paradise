@@ -20,8 +20,6 @@ const getProductAddPage = async (req, res) => {
 const addProducts = async(req, res) => {
     try {
         const products = req.body;
-        console.log(req.files);
-        console.log(products.productName);        
         const productExists = await Product.findOne({ productName: products.productName})
         if(productExists){
             res.json({ status: "failed", message: "Product already exists" });
@@ -46,7 +44,6 @@ const addProducts = async(req, res) => {
                 productImage: images
             })
             await newProduct.save()
-            console.log("product added");
             res.json({ status: "success", message: "Product added successfully" });
         }
     } catch (error) {
@@ -102,12 +99,10 @@ const getEditProduct = async (req, res) => {
 const editProduct = async (req, res) => {
     try {
         const id = req.params.id;
-        console.log("update product working", id);
         const data = req.body;
         const product = await Product.findById(id)
         
         let existingImages = product.productImage || [];
-        console.log("IMAGES: ", existingImages);
 
         if (req.files && req.files.length > 0) {
             req.files.forEach(file => {
@@ -115,7 +110,6 @@ const editProduct = async (req, res) => {
             });
         }
 
-        console.log("NEW IMAGES:", existingImages);
 
         const updatedProduct = await Product.findByIdAndUpdate(id, {
             productName: data.productName,
@@ -130,7 +124,6 @@ const editProduct = async (req, res) => {
             productImage: existingImages
         }, { new: true });
 
-        console.log("product updated");
         res.status(200).json({ status: 'success', message: 'Product updated successfully.' });
     } catch (error) {
         console.log(error.message);
@@ -143,25 +136,17 @@ const editProduct = async (req, res) => {
 const deleteImage = async (req, res) => {
     try {
         const { productId, imageName } = req.params;
-        
-        console.log("productId: ", productId);
-        console.log("Image: ", imageName);
-        console.log(await Product.findById(productId));
 
         // Remove image from productImage array in Product document
         const updatedProduct = await Product.findByIdAndUpdate(productId, {
             $pull: { productImage: imageName }
         });
 
-        console.log(updatedProduct);
-
         // Optionally, delete the image file from the file system
         const imagePath = path.join(__dirname, '../public/uploads/product-images', imageName);
         if (fs.existsSync(imagePath)) {
             fs.unlinkSync(imagePath);
         }
-
-        console.log("File got unlinked");
 
         res.json({ status: 'success', message: 'Image deleted successfully.' });
     } catch (error) {
@@ -177,7 +162,6 @@ const blockProduct = async (req, res) => {
     try {
         let id = req.query.id
         await Product.updateOne({ _id: id }, { $set: { isBlocked: true } })
-        console.log("product blocked")
         res.redirect("/admin/products")
     } catch (error) {
         console.log(error.message);
@@ -191,7 +175,6 @@ const unblockProduct = async (req, res) => {
     try {
         let id = req.query.id
         await Product.updateOne({ _id: id }, { $set: { isBlocked: false } })
-        console.log("product unblocked")
         res.redirect("/admin/products")
     } catch (error) {
         console.log(error.message);

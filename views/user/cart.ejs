@@ -6,7 +6,7 @@
             <div class="container">
                 <ul class="breadcrumb">
                     <li class="breadcrumb-item"><a href="/">Home</a></li>
-                    <li class="breadcrumb-item"><a href="#">Products</a></li>
+                    <li class="breadcrumb-item"><a href="#">Pages</a></li>
                     <li class="breadcrumb-item active">Cart</li>
                 </ul>
             </div>
@@ -100,7 +100,7 @@
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Load and display coupons in modal
+    
     document.addEventListener('DOMContentLoaded', () => {
         const updateQuantity = async (productId, newQuantity) => {
             try {
@@ -208,26 +208,6 @@ function deleteItem(productId) {
             console.error('Error:', error);
         });
 }
-/*
-        document.getElementById('view-coupons-btn').addEventListener('click', () => {
-            fetch('/coupons_list')
-                .then(response => response.json()) 
-                .then(coupons => {
-                    const couponList = coupons.map(coupon => `
-                        <div class="coupon-item">
-                            <h5>${coupon.code}</h5>
-                            <p>Max. Discount: ₹ ${coupon.maxDiscount}</p>
-                            <p>Description: ${coupon.description} </p>
-                            <p>Expiry Date: ${coupon.expiryDate}</p>
-                        </div>
-                    `).join('');
-                    document.getElementById('coupons-modal-content').innerHTML = couponList;
-                    $('#couponsModal').modal('show');
-                })
-                .catch(error => {
-                    console.error('Error loading coupons:', error);
-                });
-        });*/
 
 </script>
 <%- include("../partials/footer") %>  

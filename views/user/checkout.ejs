@@ -160,14 +160,8 @@
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
-    //document.getElementById('shipToDifferent').addEventListener('change', function() {
-    //    const shippingAddressContainer = document.getElementById('shippingAddressContainer');
-    //    if (this.checked) {
-    //        shippingAddressContainer.classList.remove('d-none');
-    //    } else {
-    //        shippingAddressContainer.classList.add('d-none');
-    //    }
-    //});
+
+//Disable COD button for more than rupees 1000
     document.addEventListener('DOMContentLoaded', function () {
         const grandTotalElement = document.getElementById('grandTotal');
         const codRadioButton = document.getElementById('payment-5');
@@ -184,6 +178,7 @@
         }
     });
 
+//Show Coupon Model    
     document.addEventListener('DOMContentLoaded', function() {
     const viewCouponsBtn = document.getElementById('view-coupons-btn');
     
@@ -232,53 +227,52 @@
 });
 
 //Ajax call to Apply Selected Coupon
-            $('#apply-selected-coupon-btn').click(function () {
-                const selectedCoupon = $('input[name="coupon"]:checked').val();
-                if (selectedCoupon) {
-                    $.ajax({
-                        url: '/checkout/apply-coupon',
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({ couponId: selectedCoupon }),
-                        success: function (response) {
-                            console.log("RESPONSE:", response);
-                            if (response.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Coupon Applied',
-                                    text: 'The coupon has been successfully applied!',
-                                }).then(() => {
-                                    location.reload(); 
-                                });
-                                $('#remove-coupon-btn').prop('disabled', false); // Enable remove coupon button
-                                $('#couponsModal').modal('hide');
-                                //updateCartSummary(response.updatedCart); // Call the function to update the cart summary
-                                $('#appliedCouponId').val(selectedCoupon); // Store the applied coupon ID
-                            } else if (response.success === false) {
-                                Swal.fire({
-                                    icon: 'warning',
-                                    title: 'Invalid Coupon',
-                                    text: response.message,
-                                });
-                            }
-                        },
-                        error: function (jqXHR, textStatus, errorThrown) {
-                            console.error('Error:', errorThrown);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: 'Unable to apply coupon. Please try again later.',
-                            });
-                        }
-                    });
-                } else {
+    $('#apply-selected-coupon-btn').click(function () {
+        const selectedCoupon = $('input[name="coupon"]:checked').val();
+        if (selectedCoupon) {
+            $.ajax({
+                url: '/checkout/apply-coupon',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ couponId: selectedCoupon }),
+                success: function (response) {
+                    console.log("RESPONSE:", response);
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Coupon Applied',
+                            text: 'The coupon has been successfully applied!',
+                        }).then(() => {
+                            location.reload(); 
+                        });
+                        $('#remove-coupon-btn').prop('disabled', false); // Enable remove coupon button
+                        $('#couponsModal').modal('hide');
+                        $('#appliedCouponId').val(selectedCoupon); // Store the applied coupon ID
+                    } else if (response.success === false) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Invalid Coupon',
+                            text: response.message,
+                        });
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('Error:', errorThrown);
                     Swal.fire({
-                        icon: 'warning',
-                        title: 'No Coupon Selected',
-                        text: 'Please select a coupon to apply.',
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Unable to apply coupon. Please try again later.',
                     });
                 }
             });
+        } else {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No Coupon Selected',
+                text: 'Please select a coupon to apply.',
+            });
+        }
+    });
 
 
 //Remove if Coupon is Applied

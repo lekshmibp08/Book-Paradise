@@ -16,20 +16,14 @@ const getUserProfile = async(req, res) => {
         if (!user) {
             return res.redirect('/login');
         }
-        console.log(user);
         const userData = await User.findById(user).lean();
         const userAddress = await Address.find({ userId: user }).lean();
         const wishData = userData.wishlist
-        //console.log(wishData);
         const orderData = await Order.find({userId : user}).sort({ createdAt: -1 });
-        //console.log("OrderData", orderData);
 
-
-
-        
         const wallet = await Wallet.findOne({ userId : user });
         const transactions = await Transaction.find({userId: user}).sort({ createdAt: -1 })
-        //console.log('WALLET: ', wallet);
+
         if (!userData) {
             console.log("No user data");
             return res.redirect('/login'); 
@@ -58,9 +52,7 @@ const AddAddress = async( req, res ) => {
     try {
         const id = req.session.user;
         const Data = req.body
-        console.log(req.session.user);
-        console.log(Data);
-
+        
         const address = new Address({
             userId: id,
             name: Data.name,
@@ -85,14 +77,13 @@ const AddAddress = async( req, res ) => {
 //Render Address Editing Page
 const getEditAddress = async( req, res ) =>{
     try {
-        console.log("Edit Address Working");
         const addressId = req.params.id;
         const user = req.session.user;
         const userData = await Address.findById(addressId)
         if( !userData ){
             return res.status(404).render('error', { message: 'Address not found' });
         }
-        console.log(userData);
+
         res.render('edit-address', { userData })
     } catch (error) {
         console.log(error.message);
@@ -105,7 +96,6 @@ const editAddress = async( req, res ) =>{
     try {
         
         const id = req.params.id;
-        console.log("Address Id : ", id);
         const updatedUser = await Address.findByIdAndUpdate(id, {
             $set: {
                 name: req.body.name,
@@ -130,7 +120,6 @@ const editAddress = async( req, res ) =>{
 const deleteAddress = async (req, res) => {
     try {
         const id = req.params.id;
-        console.log("Delete ID : ", id);
         await Address.findByIdAndDelete(id);
         res.redirect('/profile?tab=address');
     } catch (error) {
@@ -142,10 +131,8 @@ const deleteAddress = async (req, res) => {
 //Edit User Profile
 const editProfile = async( req, res ) =>{
     try {
-        console.log("Working edit Profile");
         const user = req.session.user
         const userData = await User.findById(user).lean();
-        console.log("User Data :", userData);
         res.render('edit-profile', { userData })
     } catch (error) {
         console.log(error.message);
@@ -181,7 +168,6 @@ const changePassword = async( req, res ) =>{
     try {
         
         const userId = req.params.id;
-        console.log(userId);
         const { currentPassword, newPassword, confirmPassword } = req.body;
 
         if(newPassword !== confirmPassword){
