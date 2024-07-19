@@ -371,6 +371,10 @@ const getInvoice = async( req, res ) => {
 }
 
 
+
+
+
+
 const downloadInvoice = async (req, res) => {
     try {
         const userId = req.session.user;
@@ -424,6 +428,7 @@ const downloadInvoice = async (req, res) => {
         res.status(400).render('error', { message: error.message });
     }
 };
+
 
 
 // Generate HTML from EJS template
