@@ -368,7 +368,7 @@ const sendResetPasswordMail = async (name, email, token) =>{
         from: 'sreelekshmi310192@gmail.com',
         to: email,
         subject: 'Password Reset Mail',
-        html: '<p>Hi '+name+', please click here to <a href="http://localhost:8000/reset-password?token='+token+'"> Resest</a> your Paradise Books Password '
+        html: '<p>Hi '+name+', please click here to <a href="https://books-paradise.shop/reset-password?token='+token+'"> Resest</a> your Paradise Books Password '
     }            
     transporter.sendMail(mailOptions,(error)=>{
         if(error){
@@ -549,11 +549,9 @@ const getProductDetails = async (req, res) => {
         const findCategory = await Category.findOne({name : findProduct.category})
         // console.log(findCategory);
        
-        if (user) {
-            res.render("product-details", { data: findProduct, user: user })
-        } else {
-            res.render("product-details", { data: findProduct })
-        }
+            
+        res.render("product-details", { data: findProduct, user: user || null })
+        
     } catch (error) {
         console.log(error.message);
         res.status(400).render('error', { message: error.message });
