@@ -14,7 +14,7 @@ const { notFound, errorHandler } = require("./middlewares/errorHandler");
 
 
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 3000;
 dbConnect();
 
 // Middleware setup

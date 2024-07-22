@@ -318,6 +318,19 @@ document.getElementById('checkoutForm').addEventListener('submit', function(even
     const formData = new FormData(this);
     const data = Object.fromEntries(formData.entries());
     const paymentMethod = data.paymentMethod;
+
+    // Check if a billing address is selected
+    const selectedBillingAddress = document.querySelector('input[name="billingAddress"]:checked');
+    
+    if (!selectedBillingAddress) {
+        Swal.fire({
+            title: 'No Billing Address Selected!',
+            text: 'Please select or add a billing address to proceed.',
+            icon: 'warning',
+            confirmButtonText: 'OK'
+        });
+        return; // Exit the function to prevent further processing
+    }
     
     console.log(paymentMethod);
     if (paymentMethod === 'Razorpay') {

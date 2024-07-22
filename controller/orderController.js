@@ -102,6 +102,7 @@ const placeOrder = async( req, res ) =>{
         }
 
         const { paymentMethod, billingAddress, paymentStatus } = req.body;
+        console.log(billingAddress);
         if (!paymentMethod || !billingAddress) {
             return res.status(400).json({ message: 'Payment method and billing address are required' });
         }

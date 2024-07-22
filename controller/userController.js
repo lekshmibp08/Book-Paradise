@@ -111,6 +111,7 @@ const verifyEmail = async (req, res) =>{
             if( !findUser )
                 {
                     const otp = generateOTP();
+                    console.log(otp);
                     const transporter = nodemailer.createTransport({
                         service: 'gmail',
                         host:'smtp.gmail.com',
@@ -171,6 +172,7 @@ const resendOTP = async (req, res) => {
     try {
         const email = req.session.userData.email;
         const otp = generateOTP();
+        console.log(otp)
 
         const transporter = nodemailer.createTransport({
             service: 'gmail',
