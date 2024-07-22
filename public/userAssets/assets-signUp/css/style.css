@@ -33,6 +33,7 @@
   color: rgb(46, 46, 46);
   height: 45px;
   box-shadow: none !important;
+  margin-top: 15px;
 }
 
 .service-btn:hover {
@@ -73,6 +74,8 @@
   width: 100%;
   font-size: 18px;
   box-shadow: none !important;
+  margin-top: 15px !important;
+  margin-bottom: 15px !important;
 }
 
 .auth-btn:hover {

@@ -37,7 +37,7 @@ router.post("/category/apply-offer", isAdmin, categoryController.applyCategoryOf
 
 
 //Product Management
-router.get("/products", isAdmin, productController.getAllProducts)
+router.get("/products", isAdmin, productController.getAllProducts)  
 router.get("/addProducts", isAdmin, productController.getProductAddPage)
 router.post("/addProducts", isAdmin, uploadProduct.array("productImage", 4), productController.addProducts)
 router.get("/editProduct", isAdmin, productController.getEditProduct)
