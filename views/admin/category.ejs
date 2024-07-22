@@ -404,12 +404,32 @@
                 });
 
                 const result = await response.json();
-                alert(result.message);
+                //alert(result.message);
                 if (response.ok) {
-                    window.location.href = '/admin/category';
+                    Swal.fire({
+                        title: 'Success',
+                        text: result.message,
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.href = '/admin/category';
+                    })
+                } else {
+                    Swal.fire({
+                        title: 'Failed',
+                        text: result.message,
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 }
             } catch (error) {
-                alert('An error occurred: ' + error.message);
+                Swal.fire({
+                        title: 'Failed',
+                        text: error.message,
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                //alert('An error occurred: ' + error.message);
             }
         });
 

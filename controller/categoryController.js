@@ -25,7 +25,8 @@ const addCategory = expressAsyncHandler( async(req, res) => {
             categoryImage : image
         })
         await newCategory.save()
-        res.status(201).json({ message: 'Category added successfully' });    }
+        res.status(201).json({ message: 'Category added successfully' });    
+    }
 })
 
 //Block Category
